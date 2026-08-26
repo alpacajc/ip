@@ -1,7 +1,8 @@
 import java.util.Scanner;
 import java.util.ArrayList;
 /**
- * Reads user input, repeats the input and ends session when 'bye' command is received
+ * Reads user input, and performs a task based on whether the input matches certain commands,
+ * such as adding various tasks to a to do list. Exits when the bye command is entered
  */
 public class Echo {
     private static final String NAME = "Echo";
@@ -11,45 +12,21 @@ public class Echo {
     private TodoList todoList = new TodoList();
     private Scanner scanner = new Scanner(System.in);
 
-    public class Task {
-        private String description;
-        private boolean isDone;
-
-        public Task(String description) {
-            this.description = description;
-            this.isDone = false;
-        }
-        public String get_desc() {
-            return description;
-        }
-        public String get_status_marker() {
-            return this.isDone ? "[X]" : "[ ]";
-        }
-        public void mark() {
-            this.isDone = true;
-        }
-        public void unmark() {
-            this.isDone = false;
-        }
-        @Override
-        public String toString() {
-            return this.get_status_marker() + this.description;
-        }
-    }
-
     public class TodoList {
         private ArrayList<Task> list = new ArrayList<>();
-        public void add_to_list(String item) {
-            list.add(new Task(item));
+        public void addToList(Task item) {
+            list.add(item);
+            System.out.println(String.format("\nThere are now %d items in the list\n",
+                    list.size()));
         }
-        public void mark_list(int taskNum) {
-            if (list.size() < taskNum) {
+        public void markList(int taskNum) {
+            if (list.size() < taskNum || taskNum < 1) {
                 throw new IllegalArgumentException();
             }
             list.get(taskNum - 1).mark();
         }
-        public void unmark_list(int taskNum) {
-            if (list.size() < taskNum) {
+        public void unmarkList(int taskNum) {
+            if (list.size() < taskNum || taskNum < 1) {
                 throw new IllegalArgumentException();
             }
             list.get(taskNum - 1).unmark();
@@ -62,15 +39,15 @@ public class Echo {
             int len = list.size();
             String output = "";
             for (int i = 0; i < len; i ++) {
-                Task currentElem = list.get(i);
-                output += String.format("%d. %s %s\n", i + 1,
-                        currentElem.get_status_marker(),currentElem.get_desc());
+                Task currentTask = list.get(i);
+                output += String.format("%d. %s\n", i + 1,
+                        currentTask);
             }
             return LINE + output + ENDLINE;
         }
     }
 
-    private void print_welcome() {
+    private void printWelcome() {
         String banner = " _____     _           \n"
                 + "| ____|___| |__   ___  \n"
                 + "|  _| / __| '_ \\ / _ \\ \n"
@@ -81,7 +58,7 @@ public class Echo {
         System.out.println(welcomeMessage);
     }
 
-    private void print_farewell() {
+    private void printFarewell() {
         String farewellMessage = "Goodbye" + LINE;
         System.out.println(farewellMessage);
     }
@@ -92,7 +69,7 @@ public class Echo {
             String command = input.toLowerCase();
             if (command.equals("bye")) {
                 endSession = true;
-                this.print_farewell();
+                this.printFarewell();
                 break;
             }
             else if (command.equals("list")) {
@@ -101,7 +78,7 @@ public class Echo {
             else if (command.startsWith("mark ")) {
                 try {
                     int taskNum = Integer.parseInt(command.substring(5).trim());
-                    this.todoList.mark_list(taskNum);
+                    this.todoList.markList(taskNum);
                     System.out.println(String.format("Marked this task as done:\n  %s",
                             todoList.getTask(taskNum - 1)));
                 }
@@ -112,7 +89,7 @@ public class Echo {
             else if (command.startsWith("unmark ")) {
                 try {
                     int taskNum = Integer.parseInt(command.substring(7).trim());
-                    this.todoList.unmark_list(taskNum);
+                    this.todoList.unmarkList(taskNum);
                     System.out.println(String.format("Marked this task as not done:\n  %s",
                             todoList.getTask(taskNum - 1)));
                 }
@@ -120,8 +97,50 @@ public class Echo {
                     System.out.println("Invalid input for unmark. Example usage: unmark 2");
                 }
             }
+            else if (command.startsWith("todo ")) {
+                try {
+                    String desc = input.substring(5).trim();
+                    Todo newTask = new Todo(desc);
+                    this.todoList.addToList(newTask);
+                    System.out.println(String.format("Added this todo task:\n  %s",
+                            newTask));
+                }
+                catch (IllegalArgumentException e) {
+                    System.out.println("Invalid input for todo.");
+                }
+            }
+            else if (command.startsWith("deadline ")) {
+                try {
+                    String[] desc = input.substring(9).trim().split(" /");
+                    if (desc.length < 2) {
+                        throw new IllegalArgumentException();
+                    }
+                    Deadline newTask = new Deadline(desc[0], desc[1]);
+                    this.todoList.addToList(newTask);
+                    System.out.println(String.format("Added this deadline task:\n  %s",
+                            newTask));
+                }
+                catch (IllegalArgumentException e) {
+                    System.out.println("Invalid input for deadline.");
+                }
+            }
+            else if (command.startsWith("event ")) {
+                try {
+                    String[] desc = input.substring(6).trim().split(" /");
+                    if (desc.length < 3) {
+                        throw new IllegalArgumentException();
+                    }
+                    Event newTask = new Event(desc[0], desc[1], desc[2]);
+                    this.todoList.addToList(newTask);
+                    System.out.println(String.format("Added this event task:\n  %s",
+                            newTask));
+                }
+                catch (IllegalArgumentException e) {
+                    System.out.println("Invalid input for event.");
+                }
+            }
             else {
-                this.todoList.add_to_list(input);
+                this.todoList.addToList(new Task(input));
                 System.out.println(LINE + "Added: " + input + ENDLINE);
             }
         }
@@ -129,7 +148,88 @@ public class Echo {
 
     public static void main(String[] args) {
         Echo echo = new Echo();
-        echo.print_welcome();
+        echo.printWelcome();
         echo.start();
     }
 }
+
+/**
+ * Represents a task with a description and completion status.
+ */
+class Task {
+    private String description;
+    private boolean isDone;
+
+    public Task(String description) {
+        this.description = description;
+        this.isDone = false;
+    }
+    public String getDesc() {
+        return description;
+    }
+    public String getStatusMarker() {
+        return this.isDone ? "[X]" : "[ ]";
+    }
+    public void mark() {
+        this.isDone = true;
+    }
+    public void unmark() {
+        this.isDone = false;
+    }
+    @Override
+    public String toString() {
+        return this.getStatusMarker() + " " + this.description;
+    }
+}
+
+/**
+ * Creates a task item with no time or date associated with it.
+ */
+class Todo extends Task {
+    String taskMarker = "[T]";
+    public Todo(String desc) {
+        super(desc);
+    }
+    @Override
+    public String toString() {
+        return String.format("%s%s %s", this.taskMarker, this.getStatusMarker(),
+                super.getDesc());
+    }
+}
+
+/**
+ * Creates a deadline task with a description and due date.
+ */
+class Deadline extends Task {
+    String taskMarker = "[D]";
+    String deadline = "";
+    public Deadline(String desc, String deadline) {
+        super(desc);
+        this.deadline = deadline;
+    }
+    @Override
+    public String toString() {
+        return String.format("%s%s %s (By: %s)", this.taskMarker, this.getStatusMarker(),
+                super.getDesc(), this.deadline);
+    }
+}
+
+/**
+ * Creates an event item with a from time and to time.
+ */
+class Event extends Task {
+    String taskMarker = "[E]";
+    String from = "";
+    String to = "";
+    public Event(String desc, String from, String to) {
+        super(desc);
+        this.from = from;
+        this.to = to;
+    }
+    @Override
+    public String toString() {
+        return String.format("%s%s %s (from: %s to: %s)", this.taskMarker, this.getStatusMarker(),
+                super.getDesc(), this.from, this.to);
+    }
+}
+
