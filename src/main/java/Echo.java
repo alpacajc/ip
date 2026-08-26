@@ -64,85 +64,81 @@ public class Echo {
     }
 
     private void start() {
-        while (!endSession) {
-            String input = this.scanner.nextLine();
-            String command = input.toLowerCase();
-            if (command.equals("bye")) {
-                endSession = true;
-                this.printFarewell();
-                break;
-            }
-            else if (command.equals("list")) {
-                System.out.println(this.todoList);
-            }
-            else if (command.startsWith("mark ")) {
-                try {
-                    int taskNum = Integer.parseInt(command.substring(5).trim());
-                    this.todoList.markList(taskNum);
-                    System.out.println(String.format("Marked this task as done:\n  %s",
-                            todoList.getTask(taskNum - 1)));
-                }
-                catch (IllegalArgumentException e) {
-                    System.out.println("Invalid input for mark. Example usage: mark 2");
-                }
-            }
-            else if (command.startsWith("unmark ")) {
-                try {
-                    int taskNum = Integer.parseInt(command.substring(7).trim());
-                    this.todoList.unmarkList(taskNum);
-                    System.out.println(String.format("Marked this task as not done:\n  %s",
-                            todoList.getTask(taskNum - 1)));
-                }
-                catch (IllegalArgumentException e) {
-                    System.out.println("Invalid input for unmark. Example usage: unmark 2");
-                }
-            }
-            else if (command.startsWith("todo ")) {
-                try {
-                    String desc = input.substring(5).trim();
-                    Todo newTask = new Todo(desc);
-                    this.todoList.addToList(newTask);
-                    System.out.println(String.format("Added this todo task:\n  %s",
-                            newTask));
-                }
-                catch (IllegalArgumentException e) {
-                    System.out.println("Invalid input for todo.");
-                }
-            }
-            else if (command.startsWith("deadline ")) {
-                try {
-                    String[] desc = input.substring(9).trim().split(" /");
-                    if (desc.length < 2) {
-                        throw new IllegalArgumentException();
+        try {
+            while (!endSession) {
+                String input = this.scanner.nextLine();
+                String command = input.toLowerCase();
+                if (command.equals("bye")) {
+                    endSession = true;
+                    this.printFarewell();
+                    break;
+                } else if (command.equals("list")) {
+                    System.out.println(this.todoList);
+                } else if (command.startsWith("mark ")) {
+                    try {
+                        int taskNum = Integer.parseInt(command.substring(5).trim());
+                        this.todoList.markList(taskNum);
+                        System.out.println(String.format("Marked this task as done:\n  %s",
+                                todoList.getTask(taskNum - 1)));
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Invalid input for mark. Example usage: mark 2");
                     }
-                    Deadline newTask = new Deadline(desc[0], desc[1]);
-                    this.todoList.addToList(newTask);
-                    System.out.println(String.format("Added this deadline task:\n  %s",
-                            newTask));
-                }
-                catch (IllegalArgumentException e) {
-                    System.out.println("Invalid input for deadline.");
-                }
-            }
-            else if (command.startsWith("event ")) {
-                try {
-                    String[] desc = input.substring(6).trim().split(" /");
-                    if (desc.length < 3) {
-                        throw new IllegalArgumentException();
+                } else if (command.startsWith("unmark ")) {
+                    try {
+                        int taskNum = Integer.parseInt(command.substring(7).trim());
+                        this.todoList.unmarkList(taskNum);
+                        System.out.println(String.format("Marked this task as not done:\n  %s",
+                                todoList.getTask(taskNum - 1)));
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Invalid input for unmark. Example usage: unmark 2");
                     }
-                    Event newTask = new Event(desc[0], desc[1], desc[2]);
-                    this.todoList.addToList(newTask);
-                    System.out.println(String.format("Added this event task:\n  %s",
-                            newTask));
-                }
-                catch (IllegalArgumentException e) {
-                    System.out.println("Invalid input for event.");
+                } else if (command.startsWith("todo ")) {
+                    try {
+                        String desc = input.substring(5).trim();
+                        if (desc.isEmpty()) {
+                            throw new IllegalArgumentException();
+                        }
+                        Todo newTask = new Todo(desc);
+                        this.todoList.addToList(newTask);
+                        System.out.println(String.format("Added this todo task:\n  %s",
+                                newTask));
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Invalid input for todo.");
+                    }
+                } else if (command.startsWith("deadline ")) {
+                    try {
+                        String[] desc = input.substring(9).trim().split(" /");
+                        if (desc.length < 2 || desc[0].isEmpty()) {
+                            throw new IllegalArgumentException();
+                        }
+                        Deadline newTask = new Deadline(desc[0], desc[1]);
+                        this.todoList.addToList(newTask);
+                        System.out.println(String.format("Added this deadline task:\n  %s",
+                                newTask));
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Invalid input for deadline.");
+                    }
+                } else if (command.startsWith("event ")) {
+                    try {
+                        String[] desc = input.substring(6).trim().split(" /");
+                        if (desc.length < 3 || desc[0].isEmpty()) {
+                            throw new IllegalArgumentException();
+                        }
+                        Event newTask = new Event(desc[0], desc[1], desc[2]);
+                        this.todoList.addToList(newTask);
+                        System.out.println(String.format("Added this event task:\n  %s",
+                                newTask));
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Invalid input for event.");
+                    }
+                } else {
+                    throw new InvalidCommandException("Invalid command");
                 }
             }
-            else {
-                this.todoList.addToList(new Task(input));
-                System.out.println(LINE + "Added: " + input + ENDLINE);
-            }
+        }
+        catch (InvalidCommandException e) {
+            System.out.println("Sorry, I don't understand that.");
+            this.start();
         }
     }
 
@@ -230,6 +226,12 @@ class Event extends Task {
     public String toString() {
         return String.format("%s%s %s (from: %s to: %s)", this.taskMarker, this.getStatusMarker(),
                 super.getDesc(), this.from, this.to);
+    }
+}
+
+class InvalidCommandException extends IllegalArgumentException {
+    public InvalidCommandException(String message) {
+        super(message);
     }
 }
 
