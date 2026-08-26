@@ -31,6 +31,9 @@ public class Echo {
             }
             list.get(taskNum - 1).unmark();
         }
+        public Task deleteTask(int index) {
+            return this.list.remove(index);
+        }
         public Task getTask(int index){
             return this.list.get(index);
         }
@@ -44,6 +47,9 @@ public class Echo {
                         currentTask);
             }
             return LINE + output + ENDLINE;
+        }
+        public int getSize() {
+            return list.size();
         }
     }
 
@@ -130,6 +136,14 @@ public class Echo {
                                 newTask));
                     } catch (IllegalArgumentException e) {
                         System.out.println("Invalid input for event.");
+                    }
+                } else if (command.startsWith("delete ")) {
+                    try {
+                        int taskNum = Integer.parseInt(command.substring(7).trim());
+                        System.out.println(String.format("Deleted this task\n  %s\nNow you have %d tasks left",
+                                todoList.deleteTask(taskNum - 1), todoList.getSize()));
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Invalid input for unmark. Example usage: unmark 2");
                     }
                 } else {
                     throw new InvalidCommandException("Invalid command");
