@@ -69,84 +69,123 @@ public class Echo {
         System.out.println(farewellMessage);
     }
 
+    public enum CommandWord {
+        BYE("bye"),
+        LIST("list"),
+        MARK("mark"),
+        UNMARK("unmark"),
+        TODO("todo"),
+        DEADLINE("deadline"),
+        EVENT("event"),
+        DELETE("delete"),
+        INVALID("invalid");
+
+        public String cmd;
+
+        CommandWord(String cmd) {
+            this.cmd = cmd;
+        }
+
+        public static CommandWord fromString(String input) {
+            input = input.toLowerCase().trim().split(" ")[0];
+            for (CommandWord cmdword : values()) {
+                if (cmdword.cmd.equals(input)) {
+                    return cmdword;
+                }
+            }
+            return INVALID;
+        }
+    }
+
     private void start() {
         try {
             while (!endSession) {
                 String input = this.scanner.nextLine();
                 String command = input.toLowerCase();
-                if (command.equals("bye")) {
-                    endSession = true;
-                    this.printFarewell();
-                    break;
-                } else if (command.equals("list")) {
-                    System.out.println(this.todoList);
-                } else if (command.startsWith("mark ")) {
-                    try {
-                        int taskNum = Integer.parseInt(command.substring(5).trim());
-                        this.todoList.markList(taskNum);
-                        System.out.println(String.format("Marked this task as done:\n  %s",
-                                todoList.getTask(taskNum - 1)));
-                    } catch (IllegalArgumentException e) {
-                        System.out.println("Invalid input for mark. Example usage: mark 2");
+                CommandWord cmdword = CommandWord.fromString(command);
+                switch (cmdword) {
+                    case BYE -> {
+                        endSession = true;
+                        this.printFarewell();
+                        break;
                     }
-                } else if (command.startsWith("unmark ")) {
-                    try {
-                        int taskNum = Integer.parseInt(command.substring(7).trim());
-                        this.todoList.unmarkList(taskNum);
-                        System.out.println(String.format("Marked this task as not done:\n  %s",
-                                todoList.getTask(taskNum - 1)));
-                    } catch (IllegalArgumentException e) {
-                        System.out.println("Invalid input for unmark. Example usage: unmark 2");
+                    case LIST -> {
+                        System.out.println(this.todoList);
                     }
-                } else if (command.startsWith("todo ")) {
-                    try {
-                        String desc = input.substring(5).trim();
-                        if (desc.isEmpty()) {
-                            throw new IllegalArgumentException();
+                    case MARK -> {
+                        try {
+                            int taskNum = Integer.parseInt(command.substring(5).trim());
+                            this.todoList.markList(taskNum);
+                            System.out.println(String.format("Marked this task as done:\n  %s",
+                                    todoList.getTask(taskNum - 1)));
+                        } catch (IllegalArgumentException e) {
+                            System.out.println("Invalid input for mark. Example usage: mark 2");
                         }
-                        Todo newTask = new Todo(desc);
-                        this.todoList.addToList(newTask);
-                        System.out.println(String.format("Added this todo task:\n  %s",
-                                newTask));
-                    } catch (IllegalArgumentException e) {
-                        System.out.println("Invalid input for todo.");
                     }
-                } else if (command.startsWith("deadline ")) {
-                    try {
-                        String[] desc = input.substring(9).trim().split(" /");
-                        if (desc.length < 2 || desc[0].isEmpty()) {
-                            throw new IllegalArgumentException();
+                    case UNMARK -> {
+                        try {
+                            int taskNum = Integer.parseInt(command.substring(7).trim());
+                            this.todoList.unmarkList(taskNum);
+                            System.out.println(String.format("Marked this task as not done:\n  %s",
+                                    todoList.getTask(taskNum - 1)));
+                        } catch (IllegalArgumentException e) {
+                            System.out.println("Invalid input for unmark. Example usage: unmark 2");
                         }
-                        Deadline newTask = new Deadline(desc[0], desc[1]);
-                        this.todoList.addToList(newTask);
-                        System.out.println(String.format("Added this deadline task:\n  %s",
-                                newTask));
-                    } catch (IllegalArgumentException e) {
-                        System.out.println("Invalid input for deadline.");
                     }
-                } else if (command.startsWith("event ")) {
-                    try {
-                        String[] desc = input.substring(6).trim().split(" /");
-                        if (desc.length < 3 || desc[0].isEmpty()) {
-                            throw new IllegalArgumentException();
+                    case TODO -> {
+                        try {
+                            String desc = input.substring(5).trim();
+                            if (desc.isEmpty()) {
+                                throw new IllegalArgumentException();
+                            }
+                            Todo newTask = new Todo(desc);
+                            this.todoList.addToList(newTask);
+                            System.out.println(String.format("Added this todo task:\n  %s",
+                                    newTask));
+                        } catch (IllegalArgumentException e) {
+                            System.out.println("Invalid input for todo.");
                         }
-                        Event newTask = new Event(desc[0], desc[1], desc[2]);
-                        this.todoList.addToList(newTask);
-                        System.out.println(String.format("Added this event task:\n  %s",
-                                newTask));
-                    } catch (IllegalArgumentException e) {
-                        System.out.println("Invalid input for event.");
                     }
-                } else if (command.startsWith("delete ")) {
-                    try {
-                        int taskNum = Integer.parseInt(command.substring(7).trim());
-                        System.out.println(String.format("Deleted this task\n  %s\nNow you have %d tasks left",
-                                todoList.deleteTask(taskNum - 1), todoList.getSize()));
-                    } catch (IllegalArgumentException e) {
-                        System.out.println("Invalid input for unmark. Example usage: unmark 2");
+                    case DEADLINE -> {
+                        try {
+                            String[] desc = input.substring(9).trim().split(" /");
+                            if (desc.length < 2 || desc[0].isEmpty()) {
+                                throw new IllegalArgumentException();
+                            }
+                            Deadline newTask = new Deadline(desc[0], desc[1]);
+                            this.todoList.addToList(newTask);
+                            System.out.println(String.format("Added this deadline task:\n  %s",
+                                    newTask));
+                        } catch (IllegalArgumentException e) {
+                            System.out.println("Invalid input for deadline.");
+                        }
                     }
-                } else {
-                    throw new InvalidCommandException("Invalid command");
+                    case EVENT -> {
+                        try {
+                            String[] desc = input.substring(6).trim().split(" /");
+                            if (desc.length < 3 || desc[0].isEmpty()) {
+                                throw new IllegalArgumentException();
+                            }
+                            Event newTask = new Event(desc[0], desc[1], desc[2]);
+                            this.todoList.addToList(newTask);
+                            System.out.println(String.format("Added this event task:\n  %s",
+                                    newTask));
+                        } catch (IllegalArgumentException e) {
+                            System.out.println("Invalid input for event.");
+                        }
+                    }
+                    case DELETE -> {
+                        try {
+                            int taskNum = Integer.parseInt(command.substring(7).trim());
+                            System.out.println(String.format("Deleted this task\n  %s\nNow you have %d tasks left",
+                                    todoList.deleteTask(taskNum - 1), todoList.getSize()));
+                        } catch (IllegalArgumentException e) {
+                            System.out.println("Invalid input for unmark. Example usage: unmark 2");
+                        }
+                    }
+                    case INVALID -> {
+                        throw new InvalidCommandException("Invalid command");
+                    }
                 }
             }
         }
