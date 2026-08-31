@@ -1,9 +1,16 @@
 import java.io.IOException;
+import java.time.DateTimeException;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 /**
  * Reads user input, and performs a task based on whether the input matches certain commands,
  * such as adding various tasks to a to do list. Exits when the bye command is entered
@@ -115,26 +122,39 @@ public class Echo {
                     }
                     case DEADLINE -> {
                         try {
-                            String[] desc = input.substring(9).trim().split(" /");
+                            String[] desc = input.substring(9).trim().split(" ");
                             if (desc.length < 2 || desc[0].isEmpty()) {
                                 throw new IllegalArgumentException();
                             }
-                            Deadline newTask = new Deadline(desc[0], desc[1]);
+                            Deadline newTask;
+                            if (desc.length > 2) {
+                                newTask = new Deadline(desc[0], desc[1], desc[2]);
+                            }
+                            else {
+                                newTask = new Deadline(desc[0], desc[1]);
+                            }
                             this.todoList.addToList(newTask);
                             System.out.println(String.format("Added this deadline task:\n  %s",
                                     newTask));
                             store.writeData(todoList.getList());
-                        } catch (IllegalArgumentException e) {
+                        } catch (IllegalArgumentException | DateTimeException e) {
                             System.out.println("Invalid input for deadline.");
                         }
                     }
                     case EVENT -> {
                         try {
-                            String[] desc = input.substring(6).trim().split(" /");
+                            String[] desc = input.substring(6).trim().split(" ");
                             if (desc.length < 3 || desc[0].isEmpty()) {
                                 throw new IllegalArgumentException();
                             }
-                            Event newTask = new Event(desc[0], desc[1], desc[2]);
+                            Task newTask;
+                            if (desc.length >= 5) {
+                                newTask = new Event(desc[0], desc[1], desc[2], desc[3], desc[4]);
+                            }
+                            else {
+                                System.out.println("test");
+                                newTask = new Event(desc[0], desc[1], desc[2]);
+                            }
                             this.todoList.addToList(newTask);
                             System.out.println(String.format("Added this event task:\n  %s",
                                     newTask));
@@ -209,15 +229,30 @@ class Storage {
                     else if (taskType.equals("D")) {
                         String deadline = taskArgs[3];
                         Task currentTask = new Deadline(taskDesc, deadline);
+                        if (taskArgs.length > 4) {
+                            String time = taskArgs[4];
+                            currentTask = new Deadline(taskDesc, deadline, time);
+                        }
                         if (marked) {
                             currentTask.mark();
                         }
                         todoList.addToList(currentTask);
                     }
                     else if (taskType.equals("E")) {
-                        String from = taskArgs[3];
-                        String to = taskArgs[4];
-                        Task currentTask = new Event(taskDesc, from, to);
+                        Task currentTask;
+                        if (taskArgs.length > 6) {
+                            String from = taskArgs[3];
+                            String to = taskArgs[5];
+                            String fromTime = taskArgs[4];
+                            String toTime = taskArgs[6];
+                            System.out.println("test");
+                            currentTask = new Event(taskDesc, from, fromTime, to, toTime);
+                        }
+                        else {
+                            String from = taskArgs[3];
+                            String to = taskArgs[4];
+                            currentTask = new Event(taskDesc, from, to);
+                        }
                         if (marked) {
                             currentTask.mark();
                         }
@@ -357,20 +392,36 @@ class Todo extends Task {
  */
 class Deadline extends Task {
     String taskMarker = "[D]";
-    String deadline = "";
+    LocalDate deadlineDate;
+    String formattedDate;
+    String deadline;
+    String time = "";
+
     public Deadline(String desc, String deadline) {
         super(desc);
         this.deadline = deadline;
+        this.deadlineDate = LocalDate.parse(deadline);
+        this.formattedDate = this.deadlineDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy"));
+    }
+    public Deadline(String desc, String deadline, String time) {
+        super(desc);
+        this.deadline = deadline;
+        this.time = time;
+        int timeInt = Integer.parseInt(time);
+        this.deadlineDate = LocalDate.parse(deadline);
+        this.formattedDate = this.deadlineDate
+                .atTime(Math.floorDiv(timeInt, 100), timeInt % 100)
+                .format(DateTimeFormatter.ofPattern("dd MMM yyyy hhmma"));
     }
     @Override
     public String toString() {
         return String.format("%s%s %s (By: %s)", this.taskMarker, this.getStatusMarker(),
-                super.getDesc(), this.deadline);
+                super.getDesc(), this.formattedDate);
     }
     @Override
     public String toStorageFormat() {
         return String.join(" // ", new String[]{"D", super.getStatus(),
-                super.getDesc(), deadline});
+                super.getDesc(), deadline, time});
     }
 }
 
@@ -379,22 +430,46 @@ class Deadline extends Task {
  */
 class Event extends Task {
     String taskMarker = "[E]";
-    String from = "";
-    String to = "";
+    String formattedFromDate;
+    String formattedToDate;
+    String from;
+    String to;
+    LocalDate fromDate;
+    LocalDate toDate;
+
     public Event(String desc, String from, String to) {
         super(desc);
         this.from = from;
         this.to = to;
+        this.fromDate = LocalDate.parse(from);
+        this.toDate = LocalDate.parse(to);
+        this.formattedFromDate = this.fromDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy"));
+        this.formattedToDate = this.toDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy"));
+    }
+    public Event(String desc, String from, String fromTime, String to, String toTime) {
+        super(desc);
+        this.from = from;
+        this.to = to;
+        this.fromDate = LocalDate.parse(from);
+        this.toDate = LocalDate.parse(to);
+        int fromTimeInt = Integer.parseInt(fromTime);
+        int toTimeInt = Integer.parseInt(toTime);
+        this.formattedFromDate = this.fromDate
+                .atTime(Math.floorDiv(fromTimeInt, 100), fromTimeInt % 100)
+                .format(DateTimeFormatter.ofPattern("dd MMM yyyy hhmma"));
+        this.formattedToDate = this.toDate
+                .atTime(Math.floorDiv(toTimeInt, 100), toTimeInt % 100)
+                .format(DateTimeFormatter.ofPattern("dd MMM yyyy hhmma"));
     }
     @Override
     public String toString() {
         return String.format("%s%s %s (from: %s to: %s)", this.taskMarker, this.getStatusMarker(),
-                super.getDesc(), this.from, this.to);
+                super.getDesc(), this.formattedFromDate, this.formattedToDate);
     }
     @Override
     public String toStorageFormat() {
         return String.join(" // ", new String[]{"E", super.getStatus(),
-                super.getDesc(), from, to});
+                super.getDesc(), this.from, this.to});
     }
 }
 
