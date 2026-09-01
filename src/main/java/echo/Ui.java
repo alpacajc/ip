@@ -1,5 +1,6 @@
+package echo;
+
 import java.util.Scanner;
-import java.util.ArrayList;
 
 public class Ui {
     private Scanner scanner = new Scanner(System.in);
@@ -7,6 +8,7 @@ public class Ui {
     private static final String LINE = "\n" + "-".repeat(30) + "\n";
     private static final String ENDLINE = "\n" + "-".repeat(30);
 
+    public Ui() {};
     public String readCommand() {
         return this.scanner.nextLine();
     }

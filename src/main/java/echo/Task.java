@@ -1,3 +1,5 @@
+package echo;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -45,7 +47,7 @@ class Todo extends Task {
     }
     @Override
     public String toString() {
-        return String.format("%s%s %s", this.taskMarker, this.getStatusMarker(),
+        return String.format("%s%s %s", this.taskMarker, super.getStatusMarker(),
                 super.getDesc());
     }
 }

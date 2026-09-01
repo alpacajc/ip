@@ -1,3 +1,5 @@
+package echo;
+
 import java.util.ArrayList;
 
 public class TodoList {
@@ -5,6 +7,7 @@ public class TodoList {
     private static final String LINE = "\n" + "-".repeat(30) + "\n";
     private static final String ENDLINE = "\n" + "-".repeat(30);
 
+    public TodoList() {};
     public void addToList(Task item) {
         list.add(item);
         System.out.println(String.format("\nThere are now %d items in the list\n",
