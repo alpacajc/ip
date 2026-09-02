@@ -174,6 +174,9 @@ class Parser {
     }
 
     public String[] parseTask(String input, String command) throws InvalidCommandException {
+        if (input.equals(command)) {
+            throw new InvalidCommandException();
+        }
         String[] commandArgs = input.trim()
                 .substring(command.length() + 1).split(" /");
         if (commandArgs.length >= 1) {
