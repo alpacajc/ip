@@ -4,8 +4,11 @@ import java.time.DateTimeException;
 
 
 /**
- * Reads user input, and performs a task based on whether the input matches certain commands,
- * such as adding various tasks to a to do list. Exits when the bye command is entered
+ * Runs the Echo command-line task manager.
+ *
+ * <p>This class reads commands from the user, updates the task list, saves changes to storage,
+ * and displays feedback through the user interface. The session ends when the user enters the
+ * {@code bye} command.</p>
  */
 public class Echo {
     private static boolean endSession = false;
@@ -14,6 +17,9 @@ public class Echo {
     private Ui ui = new Ui();
     private Parser parser = new Parser();
 
+    /**
+     * Represents the command words supported by Echo.
+     */
     public enum CommandWord {
         BYE("bye"),
         LIST("list"),
@@ -31,6 +37,12 @@ public class Echo {
             this.cmd = cmd;
         }
 
+        /**
+         * Returns the command word that corresponds to the given input.
+         *
+         * @param input the command word entered by the user
+         * @return the matching command word, or {@link #INVALID} when no command matches
+         */
         public static CommandWord fromString(String input) {
             for (CommandWord cmdword : values()) {
                 if (cmdword.cmd.equals(input)) {
@@ -145,6 +157,11 @@ public class Echo {
         }
     }
 
+    /**
+     * Starts Echo by loading saved tasks, displaying a welcome message, and processing commands.
+     *
+     * @param args command-line arguments; Echo does not use them
+     */
     public static void main(String[] args) {
         Echo echo = new Echo();
         echo.store.readData();
