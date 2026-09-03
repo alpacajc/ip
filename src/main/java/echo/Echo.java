@@ -170,10 +170,20 @@ public class Echo {
     }
 }
 
+/**
+ * Parses user input into commands and their associated arguments.
+ */
 class Parser {
 
+    /** Stores the arguments from the most recently parsed command. */
     String[] commandArgs;
 
+    /**
+     * Splits an input line into arguments and converts the command to lowercase.
+     *
+     * @param input the user input to parse
+     * @return the command and its arguments
+     */
     public String[] parseInput(String input) {
         String[] commandArgs = input.trim().split(" ");
         commandArgs[0] = commandArgs[0].toLowerCase();
@@ -181,6 +191,13 @@ class Parser {
         return commandArgs;
     }
 
+    /**
+     * Returns the task number from the most recently parsed command.
+     *
+     * @return the task number specified in the command
+     * @throws InvalidCommandException if the command does not include a task number
+     * @throws NumberFormatException if the task number is not a valid integer
+     */
     public int parseTaskNum() throws InvalidCommandException {
         if (commandArgs.length > 1) {
             return Integer.parseInt(commandArgs[1]);
@@ -190,6 +207,14 @@ class Parser {
         }
     }
 
+    /**
+     * Extracts a task description and any slash-prefixed details from a command.
+     *
+     * @param input the complete user input
+     * @param command the command prefix to remove from the input
+     * @return the description and optional details, split at {@code " /"}
+     * @throws InvalidCommandException if the command has no task description
+     */
     public String[] parseTask(String input, String command) throws InvalidCommandException {
         if (input.equals(command)) {
             throw new InvalidCommandException();
