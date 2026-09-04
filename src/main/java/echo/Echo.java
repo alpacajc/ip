@@ -2,7 +2,6 @@ package echo;
 
 import java.time.DateTimeException;
 
-
 /**
  * Runs the Echo command-line task manager.
  *
@@ -106,8 +105,7 @@ public class Echo {
                             Deadline newTask;
                             if (desc.length > 2) {
                                 newTask = new Deadline(desc[0], desc[1], desc[2]);
-                            }
-                            else {
+                            } else {
                                 newTask = new Deadline(desc[0], desc[1]);
                             }
                             this.todoList.addToList(newTask);
@@ -123,8 +121,7 @@ public class Echo {
                             Task newTask;
                             if (desc.length > 4) {
                                 newTask = new Event(desc[0], desc[1], desc[2], desc[3], desc[4]);
-                            }
-                            else {
+                            } else {
                                 newTask = new Event(desc[0], desc[1], desc[2]);
                             }
                             this.todoList.addToList(newTask);
@@ -184,8 +181,7 @@ class Parser {
     public int parseTaskNum() throws InvalidCommandException {
         if (commandArgs.length > 1) {
             return Integer.parseInt(commandArgs[1]);
-        }
-        else {
+        } else {
             throw new InvalidCommandException();
         }
     }
@@ -198,8 +194,7 @@ class Parser {
                 .substring(command.length() + 1).split(" /");
         if (commandArgs.length >= 1) {
             return commandArgs;
-        }
-        else {
+        } else {
             throw new InvalidCommandException();
         }
     }
@@ -209,6 +204,8 @@ class InvalidCommandException extends IllegalArgumentException {
     public InvalidCommandException(String message) {
         super(message);
     }
-    public InvalidCommandException() {}
+
+    public InvalidCommandException() {
+    }
 }
 

@@ -32,8 +32,9 @@ public class Task {
      *
      * @return {@code "true"} when complete; otherwise {@code "false"}
      */
-    public String getStatus() {return String.valueOf(isDone);}
-
+    public String getStatus() {
+        return String.valueOf(isDone);
+    }
     /**
      * Returns the visual marker for this task's completion status.
      *

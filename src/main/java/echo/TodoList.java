@@ -13,7 +13,8 @@ public class TodoList {
     /**
      * Creates an empty task list.
      */
-    public TodoList() {};
+    public TodoList() {
+    };
 
     /**
      * Adds a task to the end of this list.

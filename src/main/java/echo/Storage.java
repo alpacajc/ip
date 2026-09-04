@@ -10,14 +10,16 @@ import java.util.Scanner;
 public class Storage {
     File listFile;
     TodoList todoList;
+
     public Storage(String filePath, TodoList todoList) {
         this.listFile = new File(filePath);
         this.todoList = todoList;
     }
+
     public void fileExists() {
         System.out.println("File exists: " + listFile.exists());
     }
-    // taskArgs: [type, marked, desc, others...]
+
     public void readData() {
         if (listFile.exists()) {
             System.out.println(listFile.getName() + " already exists");
@@ -61,8 +63,7 @@ public class Storage {
                             String toTime = taskArgs[6];
                             System.out.println("test");
                             currentTask = new Event(taskDesc, from, fromTime, to, toTime);
-                        }
-                        else {
+                        } else {
                             String from = taskArgs[3];
                             String to = taskArgs[4];
                             currentTask = new Event(taskDesc, from, to);
@@ -82,8 +83,7 @@ public class Storage {
             try {
                 listFile.createNewFile();
                 System.out.println("File created: " + listFile.getName());
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 System.out.println(e.getMessage());
             }
         }
@@ -95,8 +95,7 @@ public class Storage {
                 fw.write(task.toStorageFormat() + "\n");
             }
             fw.close();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             System.out.println(e.getMessage());
         }
     }
