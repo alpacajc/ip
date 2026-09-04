@@ -96,6 +96,16 @@ public class Ui {
     }
 
     /**
+     * Displays every task in the given search result list.
+     *
+     * @param list the task list to display
+     */
+    public void printSearchList(TodoList list) {
+        System.out.println("\nHere are the matching tasks:");
+        System.out.println(list);
+    }
+
+    /**
      * Displays the message used for an unrecognised command.
      */
     public void printInvalidCommandMessage() {

@@ -22,7 +22,7 @@ public class TodoList {
      */
     public void addToList(Task item) {
         list.add(item);
-        System.out.println(String.format("\nThere are now %d items in the list\n",
+        System.out.println(String.format("\nThere are now %d items in the list",
                 list.size()));
     }
     /**
