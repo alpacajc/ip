@@ -14,7 +14,8 @@ public class Ui {
     /**
      * Creates a user interface that reads commands from standard input.
      */
-    public Ui() {};
+    public Ui() {
+    };
 
     /**
      * Reads the next command entered by the user.
@@ -79,8 +80,7 @@ public class Ui {
         if (isMarked) {
             System.out.println(String.format("Marked this task as done:\n  %s",
                     task));
-        }
-        else {
+        } else {
             System.out.println(String.format("Marked this task as not done:\n  %s",
                     task));
         }
