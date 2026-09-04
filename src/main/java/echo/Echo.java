@@ -28,6 +28,7 @@ public class Echo {
         DEADLINE("deadline"),
         EVENT("event"),
         DELETE("delete"),
+        FIND("find"),
         INVALID("invalid");
 
         public String cmd;
@@ -142,6 +143,22 @@ public class Echo {
                             System.out.println("Invalid input for delete. Example usage: delete 2");
                         }
                     }
+                    case FIND -> {
+                        try {
+                            String keyword = parser.parseKeyword(input, command);
+                            int listSize = todoList.getSize();
+                            TodoList searchList = new TodoList();
+                            for (int i = 0; i < listSize; i++) {
+                                Task currentTask = todoList.getList().get(i);
+                                if (currentTask.getDesc().contains(keyword)) {
+                                    searchList.addToList(currentTask);
+                                }
+                            }
+                            ui.printSearchList(searchList);
+                        } catch (IllegalArgumentException | StringIndexOutOfBoundsException e) {
+                            System.out.println("Invalid input for find. Example usage: find book");
+                        }
+                    }
                     case INVALID -> {
                         throw new InvalidCommandException();
                     }
@@ -199,6 +216,19 @@ class Parser {
         if (commandArgs.length > 1) {
             return Integer.parseInt(commandArgs[1]);
         } else {
+            throw new InvalidCommandException();
+        }
+    }
+    public String parseKeyword(String input, String command) throws InvalidCommandException {
+        if (input.equals(command)) {
+            throw new InvalidCommandException();
+        }
+        String[] commandArgs = input.trim()
+                .substring(command.length() + 1).split(" ");
+        if (commandArgs.length >= 1) {
+            return String.join(" ", commandArgs);
+        }
+        else {
             throw new InvalidCommandException();
         }
     }
