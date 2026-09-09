@@ -12,7 +12,7 @@ import java.time.DateTimeException;
 public class Echo {
     private static boolean endSession = false;
     private TodoList todoList = new TodoList();
-    private Storage store = new Storage("testdata.txt", todoList);
+    protected Storage store = new Storage("testdata.txt", todoList);
     private Ui ui = new Ui();
     private Parser parser = new Parser();
 
@@ -53,122 +53,125 @@ public class Echo {
         }
     }
 
-    private void start() {
+    protected String getResponse(String input) {
         try {
-            while (!endSession) {
-                String input = ui.readCommand();
-                String[] commandArgs = parser.parseInput(input);
-                String command = commandArgs[0];
-                CommandWord cmdword = CommandWord.fromString(command);
-                switch (cmdword) {
-                    case BYE -> {
-                        endSession = true;
-                        this.ui.printFarewell();
-                        break;
+            String[] commandArgs = parser.parseInput(input);
+            String command = commandArgs[0];
+            CommandWord cmdword = CommandWord.fromString(command);
+            switch (cmdword) {
+                case BYE -> {
+                    endSession = true;
+                    return Ui.getFarewell();
+                }
+                case LIST -> {
+                    return ui.getListString(this.todoList);
+                }
+                case MARK -> {
+                    try {
+                        int taskNum = parser.parseTaskNum();
+                        this.todoList.markList(taskNum);
+                        // ui.printMark(todoList.getTask(taskNum - 1), true);
+                        store.writeData(todoList.getList());
+                        return ui.getMarkString(todoList.getTask(taskNum - 1), true);
+                    } catch (IllegalArgumentException e) {
+                        return "Invalid input for mark. Example usage: mark 2";
                     }
-                    case LIST -> {
-                        ui.printList(this.todoList);
+                }
+                case UNMARK -> {
+                    try {
+                        int taskNum = parser.parseTaskNum();
+                        this.todoList.unmarkList(taskNum);
+                        store.writeData(todoList.getList());
+                        return ui.getMarkString(todoList.getTask(taskNum - 1), false);
+                    } catch (IllegalArgumentException e) {
+                        return "Invalid input for unmark. Example usage: unmark 2";
                     }
-                    case MARK -> {
-                        try {
-                            int taskNum = parser.parseTaskNum();
-                            this.todoList.markList(taskNum);
-                            ui.printMark(todoList.getTask(taskNum - 1), true);
-                            store.writeData(todoList.getList());
-                        } catch (IllegalArgumentException e) {
-                            System.out.println("Invalid input for mark. Example usage: mark 2");
+                }
+                case TODO -> {
+                    try {
+                        String desc = parser.parseTask(input, command)[0];
+                        Todo newTask = new Todo(desc);
+                        this.todoList.addToList(newTask);
+                        // ui.printAddedTask(newTask, cmdword.toString());
+                        store.writeData(todoList.getList());
+                        return ui.getAddedTaskString(newTask, cmdword.toString());
+                    } catch (IllegalArgumentException | StringIndexOutOfBoundsException e) {
+                         return "Invalid input for todo. Example usage: todo Example";
+                    }
+                }
+                case DEADLINE -> {
+                    try {
+                        String[] desc = parser.parseTask(input, command);
+                        Deadline newTask;
+                        if (desc.length > 2) {
+                            newTask = new Deadline(desc[0], desc[1], desc[2]);
+                        } else {
+                            newTask = new Deadline(desc[0], desc[1]);
                         }
+                        this.todoList.addToList(newTask);
+                        // ui.printAddedTask(newTask, cmdword.toString());
+                        store.writeData(todoList.getList());
+                        return ui.getAddedTaskString(newTask, cmdword.toString());
+                    } catch (IllegalArgumentException | StringIndexOutOfBoundsException | DateTimeException e) {
+                        return "Invalid input for deadline. Example usage: deadline Example /2023-12-13";
                     }
-                    case UNMARK -> {
-                        try {
-                            int taskNum = parser.parseTaskNum();
-                            this.todoList.unmarkList(taskNum);
-                            ui.printMark(todoList.getTask(taskNum - 1), false);
-                            store.writeData(todoList.getList());
-                        } catch (IllegalArgumentException e) {
-                            System.out.println("Invalid input for unmark. Example usage: unmark 2");
+                }
+                case EVENT -> {
+                    try {
+                        String[] desc = parser.parseTask(input, command);
+                        Task newTask;
+                        if (desc.length > 4) {
+                            newTask = new Event(desc[0], desc[1], desc[2], desc[3], desc[4]);
+                        } else {
+                            newTask = new Event(desc[0], desc[1], desc[2]);
                         }
+                        this.todoList.addToList(newTask);
+                        // ui.printAddedTask(newTask, cmdword.toString());
+                        store.writeData(todoList.getList());
+                        return ui.getAddedTaskString(newTask, cmdword.toString());
+                    } catch (IllegalArgumentException | StringIndexOutOfBoundsException | DateTimeException e) {
+                        return "Invalid input for event. Example usage: event Example /2023-12-13 /2023-12-14";
                     }
-                    case TODO -> {
-                        try {
-                            String desc = parser.parseTask(input, command)[0];
-                            Todo newTask = new Todo(desc);
-                            this.todoList.addToList(newTask);
-                            ui.printAddedTask(newTask, cmdword.toString());
-                            store.writeData(todoList.getList());
-                        } catch (IllegalArgumentException | StringIndexOutOfBoundsException e) {
-                            System.out.println("Invalid input for todo. Example usage: todo Example");
-                        }
+                }
+                case DELETE -> {
+                    try {
+                        int taskNum = parser.parseTaskNum();
+                        Task deletedTask = todoList.deleteTask(taskNum);
+                        int listSize = todoList.getSize();
+                        // ui.printDeleteTask(deletedTask, listSize);
+                        store.writeData(todoList.getList());
+                        return ui.getDeleteTask(deletedTask, listSize);
+                    } catch (IllegalArgumentException | StringIndexOutOfBoundsException e) {
+                        return "Invalid input for delete. Example usage: delete 2";
                     }
-                    case DEADLINE -> {
-                        try {
-                            String[] desc = parser.parseTask(input, command);
-                            Deadline newTask;
-                            if (desc.length > 2) {
-                                newTask = new Deadline(desc[0], desc[1], desc[2]);
-                            } else {
-                                newTask = new Deadline(desc[0], desc[1]);
+                }
+                case FIND -> {
+                    try {
+                        String keyword = parser.parseKeyword(input, command);
+                        int listSize = todoList.getSize();
+                        TodoList searchList = new TodoList();
+                        for (int i = 0; i < listSize; i++) {
+                            Task currentTask = todoList.getList().get(i);
+                            if (currentTask.getDesc().contains(keyword)) {
+                                searchList.addToList(currentTask);
                             }
-                            this.todoList.addToList(newTask);
-                            ui.printAddedTask(newTask, cmdword.toString());
-                            store.writeData(todoList.getList());
-                        } catch (IllegalArgumentException | StringIndexOutOfBoundsException | DateTimeException e) {
-                            System.out.println("Invalid input for deadline. Example usage: deadline Example /2023-12-13");
                         }
+                        // ui.printSearchList(searchList);
+                        return ui.getSearchListString(searchList);
+                    } catch (IllegalArgumentException | StringIndexOutOfBoundsException e) {
+                        return "Invalid input for find. Example usage: find book";
                     }
-                    case EVENT -> {
-                        try {
-                            String[] desc = parser.parseTask(input, command);
-                            Task newTask;
-                            if (desc.length > 4) {
-                                newTask = new Event(desc[0], desc[1], desc[2], desc[3], desc[4]);
-                            } else {
-                                newTask = new Event(desc[0], desc[1], desc[2]);
-                            }
-                            this.todoList.addToList(newTask);
-                            ui.printAddedTask(newTask, cmdword.toString());
-                            store.writeData(todoList.getList());
-                        } catch (IllegalArgumentException | StringIndexOutOfBoundsException | DateTimeException e) {
-                            System.out.println("Invalid input for event. Example usage: event Example /2023-12-13 /2023-12-14");
-                        }
-                    }
-                    case DELETE -> {
-                        try {
-                            int taskNum = parser.parseTaskNum();
-                            Task deletedTask = todoList.deleteTask(taskNum);
-                            int listSize = todoList.getSize();
-                            ui.printDeleteTask(deletedTask, listSize);
-                            store.writeData(todoList.getList());
-                        } catch (IllegalArgumentException | StringIndexOutOfBoundsException e) {
-                            System.out.println("Invalid input for delete. Example usage: delete 2");
-                        }
-                    }
-                    case FIND -> {
-                        try {
-                            String keyword = parser.parseKeyword(input, command);
-                            int listSize = todoList.getSize();
-                            TodoList searchList = new TodoList();
-                            for (int i = 0; i < listSize; i++) {
-                                Task currentTask = todoList.getList().get(i);
-                                if (currentTask.getDesc().contains(keyword)) {
-                                    searchList.addToList(currentTask);
-                                }
-                            }
-                            ui.printSearchList(searchList);
-                        } catch (IllegalArgumentException | StringIndexOutOfBoundsException e) {
-                            System.out.println("Invalid input for find. Example usage: find book");
-                        }
-                    }
-                    case INVALID -> {
-                        throw new InvalidCommandException();
-                    }
+                }
+                case INVALID -> {
+                    throw new InvalidCommandException();
                 }
             }
         }
         catch (InvalidCommandException e) {
-            ui.printInvalidCommandMessage();
-            this.start();
+            return ui.getInvalidCommandMessage();
+            //this.start();
         }
+        return ui.getInvalidCommandMessage();
     }
 
     /**
@@ -177,10 +180,10 @@ public class Echo {
      * @param args command-line arguments; Echo does not use them
      */
     public static void main(String[] args) {
-        Echo echo = new Echo();
+        /* Echo echo = new Echo();
         echo.store.readData();
-        echo.ui.printWelcome();
-        echo.start();
+        Ui.printWelcome();
+        //echo.start(); */
     }
 }
 
