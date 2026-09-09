@@ -29,7 +29,7 @@ public class Ui {
     /**
      * Displays Echo's welcome message.
      */
-    public void printWelcome() {
+    public static void printWelcome() {
         String banner = " _____     _           \n"
                 + "| ____|___| |__   ___  \n"
                 + "|  _| / __| '_ \\ / _ \\ \n"
@@ -38,14 +38,37 @@ public class Ui {
         String welcomeMessage = LINE + banner + LINE + String.format("Hi, I'm %s.\nWhat can I do for you?\n",
                 NAME) + ENDLINE;
         System.out.println(welcomeMessage);
+        // return welcomeMessage;
+    }
+
+    /**
+     * Returns Echo's welcome message.
+     */
+    public static String getWelcome() {
+        String banner =   " _____     _           \n"
+                        + "| ____|___| |__   ___  \n"
+                        + "|  _| / __| '_ \\ / _ \\ \n"
+                        + "| |__| (__| | | | (_) |\n"
+                        + "|_____\\__|_| |_|\\___/ \n";
+        String welcomeMessage = LINE + banner + LINE + String.format("Hi, I'm %s.\nWhat can I do for you?\n",
+                NAME) + ENDLINE;
+        return welcomeMessage;
     }
 
     /**
      * Displays Echo's farewell message.
      */
-    public void printFarewell() {
+    public static void printFarewell() {
         String farewellMessage = "Goodbye" + LINE;
         System.out.println(farewellMessage);
+    }
+
+    /**
+     * @return Echo's farewell message
+     */
+    public static String getFarewell() {
+        String farewellMessage = "Goodbye" + LINE;
+        return farewellMessage;
     }
 
     /**
@@ -60,6 +83,17 @@ public class Ui {
     }
 
     /**
+     * Displays confirmation that a task was added.
+     *
+     * @param task the task that was added
+     * @param type the type of task that was added
+     */
+    public String getAddedTaskString(Task task, String type) {
+        return String.format("Added this %s task:\n  %s",
+                type, task);
+    }
+
+    /**
      * Displays confirmation that a task was deleted and the number of tasks remaining.
      *
      * @param deletedTask the task that was deleted
@@ -68,6 +102,17 @@ public class Ui {
     public void printDeleteTask(Task deletedTask, int size) {
         System.out.println(String.format("Deleted this task\n  %s\nNow you have %d tasks left",
                 deletedTask, size));
+    }
+
+    /**
+     * Return string representing confirmation that a task was deleted and the number of tasks remaining.
+     *
+     * @param deletedTask the task that was deleted
+     * @param size the number of tasks remaining
+     */
+    public String getDeleteTask(Task deletedTask, int size) {
+        return String.format("Deleted this task\n  %s\nNow you have %d tasks left",
+                deletedTask, size);
     }
 
     /**
@@ -87,12 +132,35 @@ public class Ui {
     }
 
     /**
+     * Returns string of confirmation that a task's completion status changed.
+     *
+     * @param task the task whose status changed
+     * @param isMarked whether the task is now marked as complete
+     */
+    public String getMarkString(Task task, boolean isMarked) {
+        if (isMarked) {
+            return String.format("Marked this task as done:\n  %s", task);
+        } else {
+            return String.format("Marked this task as not done:\n  %s", task);
+        }
+    }
+
+    /**
      * Displays every task in the given task list.
      *
      * @param list the task list to display
      */
     public void printList(TodoList list) {
         System.out.println(list);
+    }
+
+    /**
+     * Returns a string of every task in the given task list.
+     *
+     * @param list the task list to return as a string
+     */
+    public String getListString(TodoList list) {
+        return list.toString();
     }
 
     /**
@@ -106,9 +174,25 @@ public class Ui {
     }
 
     /**
+     * Returns a string of every task in the given search result list.
+     *
+     * @param list the task list to return as string
+     */
+    public String getSearchListString(TodoList list) {
+        return "\nHere are the matching tasks:" + "\n" + list.toString();
+    }
+
+    /**
      * Displays the message used for an unrecognised command.
      */
     public void printInvalidCommandMessage() {
         System.out.println("Sorry, I don't understand that.");
+    }
+
+    /**
+     * Displays the message used for an unrecognised command.
+     */
+    public String getInvalidCommandMessage() {
+        return "Sorry, I don't understand that.";
     }
 }
