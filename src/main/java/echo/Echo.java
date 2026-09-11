@@ -101,13 +101,8 @@ public class Echo {
                 }
                 case DEADLINE -> {
                     try {
-                        String[] desc = parser.parseTask(input, command);
-                        Deadline newTask;
-                        if (desc.length > 2) {
-                            newTask = new Deadline(desc[0], desc[1], desc[2]);
-                        } else {
-                            newTask = new Deadline(desc[0], desc[1]);
-                        }
+                        String[] taskArgs = parser.parseTask(input, command);
+                        Deadline newTask = new Deadline(taskArgs);
                         this.todoList.addToList(newTask);
                         // ui.printAddedTask(newTask, cmdword.toString());
                         store.writeData(todoList.getList());
@@ -118,13 +113,8 @@ public class Echo {
                 }
                 case EVENT -> {
                     try {
-                        String[] desc = parser.parseTask(input, command);
-                        Task newTask;
-                        if (desc.length > 4) {
-                            newTask = new Event(desc[0], desc[1], desc[2], desc[3], desc[4]);
-                        } else {
-                            newTask = new Event(desc[0], desc[1], desc[2]);
-                        }
+                        String[] taskArgs = parser.parseTask(input, command);
+                        Task newTask = new Event(taskArgs);
                         this.todoList.addToList(newTask);
                         // ui.printAddedTask(newTask, cmdword.toString());
                         store.writeData(todoList.getList());
@@ -156,14 +146,10 @@ public class Echo {
                                 searchList.addToList(currentTask);
                             }
                         }
-                        // ui.printSearchList(searchList);
                         return ui.getSearchListString(searchList);
                     } catch (IllegalArgumentException | StringIndexOutOfBoundsException e) {
                         return "Invalid input for find. Example usage: find book";
                     }
-                }
-                case INVALID -> {
-                    throw new InvalidCommandException();
                 }
             }
         }
@@ -245,7 +231,7 @@ class Parser {
      * @throws InvalidCommandException if the command has no task description
      */
     public String[] parseTask(String input, String command) throws InvalidCommandException {
-        if (input.equals(command)) {
+        if (input.trim().equals(command)) {
             throw new InvalidCommandException();
         }
         String[] commandArgs = input.trim()
