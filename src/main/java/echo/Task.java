@@ -100,23 +100,24 @@ class Deadline extends Task {
     String deadline;
     String time = "";
 
-    public Deadline(String desc, String deadline) {
-        super(desc);
-        deadline =
-        this.deadline = deadline;
+    public Deadline(String... taskArgs) {
+        super(taskArgs[0]);
+        if (taskArgs.length < 2) {
+            throw new InvalidCommandException();
+        }
+        this.deadline = taskArgs[1];
         this.deadlineDate = LocalDate.parse(deadline);
-        this.formattedDate = this.deadlineDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy"));
+        if (taskArgs.length > 2) {
+            int timeInt = Integer.parseInt(time);
+            this.formattedDate = this.deadlineDate
+                    .atTime(Math.floorDiv(timeInt, 100), timeInt % 100)
+                    .format(DateTimeFormatter.ofPattern("dd MMM yyyy hhmma"));
+        }
+        else {
+            this.formattedDate = this.deadlineDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy"));
+        }
     }
-    public Deadline(String desc, String deadline, String time) {
-        super(desc);
-        this.deadline = deadline;
-        this.time = time;
-        int timeInt = Integer.parseInt(time);
-        this.deadlineDate = LocalDate.parse(deadline);
-        this.formattedDate = this.deadlineDate
-                .atTime(Math.floorDiv(timeInt, 100), timeInt % 100)
-                .format(DateTimeFormatter.ofPattern("dd MMM yyyy hhmma"));
-    }
+
     @Override
     public String toString() {
         return String.format("%s%s %s (By: %s)", this.taskMarker, this.getStatusMarker(),
@@ -143,32 +144,32 @@ class Event extends Task {
     LocalDate fromDate;
     LocalDate toDate;
 
-    public Event(String desc, String from, String to) {
-        super(desc);
-        this.from = from;
-        this.to = to;
+    public Event(String... taskArgs) {
+        super(taskArgs[0]);
+        if (taskArgs.length < 3) {
+            throw new InvalidCommandException();
+        }
+        this.from = taskArgs[1];
+        this.to = taskArgs[2];
         this.fromDate = LocalDate.parse(from);
         this.toDate = LocalDate.parse(to);
-        this.formattedFromDate = this.fromDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy"));
-        this.formattedToDate = this.toDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy"));
+        if (taskArgs.length >= 5) {
+            this.fromTime = taskArgs[3];
+            this.toTime = taskArgs[4];
+            int fromTimeInt = Integer.parseInt(fromTime);
+            int toTimeInt = Integer.parseInt(toTime);
+            this.formattedFromDate = this.fromDate
+                    .atTime(Math.floorDiv(fromTimeInt, 100), fromTimeInt % 100)
+                    .format(DateTimeFormatter.ofPattern("dd MMM yyyy hhmma"));
+            this.formattedToDate = this.toDate
+                    .atTime(Math.floorDiv(toTimeInt, 100), toTimeInt % 100)
+                    .format(DateTimeFormatter.ofPattern("dd MMM yyyy hhmma"));
+        } else {
+            this.formattedFromDate = this.fromDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy"));
+            this.formattedToDate = this.toDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy"));
+        }
     }
-    public Event(String desc, String from, String fromTime, String to, String toTime) {
-        super(desc);
-        this.from = from;
-        this.to = to;
-        this.fromTime = fromTime;
-        this.toTime = toTime;
-        this.fromDate = LocalDate.parse(from);
-        this.toDate = LocalDate.parse(to);
-        int fromTimeInt = Integer.parseInt(fromTime);
-        int toTimeInt = Integer.parseInt(toTime);
-        this.formattedFromDate = this.fromDate
-                .atTime(Math.floorDiv(fromTimeInt, 100), fromTimeInt % 100)
-                .format(DateTimeFormatter.ofPattern("dd MMM yyyy hhmma"));
-        this.formattedToDate = this.toDate
-                .atTime(Math.floorDiv(toTimeInt, 100), toTimeInt % 100)
-                .format(DateTimeFormatter.ofPattern("dd MMM yyyy hhmma"));
-    }
+
     @Override
     public String toString() {
         return String.format("%s%s %s (from: %s to: %s)", this.taskMarker, this.getStatusMarker(),

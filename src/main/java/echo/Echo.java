@@ -90,25 +90,16 @@ public class Echo {
                         }
                     }
                     case TODO -> {
-                        try {
-                            String desc = parser.parseTask(input, command)[0];
-                            Todo newTask = new Todo(desc);
-                            this.todoList.addToList(newTask);
-                            ui.printAddedTask(newTask, cmdword.toString());
-                            store.writeData(todoList.getList());
-                        } catch (IllegalArgumentException | StringIndexOutOfBoundsException e) {
-                            System.out.println("Invalid input for todo. Example usage: todo Example");
-                        }
+                        String desc = parser.parseTask(input, command)[0];
+                        Todo newTask = new Todo(desc);
+                        this.todoList.addToList(newTask);
+                        ui.printAddedTask(newTask, cmdword.toString());
+                        store.writeData(todoList.getList());
                     }
                     case DEADLINE -> {
                         try {
-                            String[] desc = parser.parseTask(input, command);
-                            Deadline newTask;
-                            if (desc.length > 2) {
-                                newTask = new Deadline(desc[0], desc[1], desc[2]);
-                            } else {
-                                newTask = new Deadline(desc[0], desc[1]);
-                            }
+                            String[] taskArgs = parser.parseTask(input, command);
+                            Deadline newTask = new Deadline(taskArgs);
                             this.todoList.addToList(newTask);
                             ui.printAddedTask(newTask, cmdword.toString());
                             store.writeData(todoList.getList());
@@ -118,13 +109,8 @@ public class Echo {
                     }
                     case EVENT -> {
                         try {
-                            String[] desc = parser.parseTask(input, command);
-                            Task newTask;
-                            if (desc.length > 4) {
-                                newTask = new Event(desc[0], desc[1], desc[2], desc[3], desc[4]);
-                            } else {
-                                newTask = new Event(desc[0], desc[1], desc[2]);
-                            }
+                            String[] taskArgs = parser.parseTask(input, command);
+                            Task newTask = new Event(taskArgs);
                             this.todoList.addToList(newTask);
                             ui.printAddedTask(newTask, cmdword.toString());
                             store.writeData(todoList.getList());
@@ -242,7 +228,7 @@ class Parser {
      * @throws InvalidCommandException if the command has no task description
      */
     public String[] parseTask(String input, String command) throws InvalidCommandException {
-        if (input.equals(command)) {
+        if (input.trim().equals(command)) {
             throw new InvalidCommandException();
         }
         String[] commandArgs = input.trim()
