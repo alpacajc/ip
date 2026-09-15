@@ -6,15 +6,10 @@ import java.util.ArrayList;
  * Stores and manages Echo's tasks in their display order.
  */
 public class TodoList {
-    private ArrayList<Task> list = new ArrayList<>();
+    private ArrayList<Task> listOfTasks = new ArrayList<>();
+
     private static final String LINE = "\n" + "-".repeat(30) + "\n";
     private static final String ENDLINE = "\n" + "-".repeat(30);
-
-    /**
-     * Creates an empty task list.
-     */
-    public TodoList() {
-    };
 
     /**
      * Adds a task to the end of this list.
@@ -22,9 +17,9 @@ public class TodoList {
      * @param item the task to add
      */
     public void addToList(Task item) {
-        list.add(item);
+        listOfTasks.add(item);
         System.out.println(String.format("\nThere are now %d items in the list",
-                list.size()));
+                listOfTasks.size()));
     }
     /**
      * Marks the specified one-based task number as complete.
@@ -33,10 +28,10 @@ public class TodoList {
      * @throws IllegalArgumentException if the task number is outside this list
      */
     public void markList(int taskNum) {
-        if (list.size() < taskNum || taskNum < 1) {
+        if (listOfTasks.size() < taskNum || taskNum < 1) {
             throw new IllegalArgumentException();
         }
-        list.get(taskNum - 1).mark();
+        listOfTasks.get(taskNum - 1).mark();
     }
     /**
      * Marks the specified one-based task number as incomplete.
@@ -45,10 +40,10 @@ public class TodoList {
      * @throws IllegalArgumentException if the task number is outside this list
      */
     public void unmarkList(int taskNum) {
-        if (list.size() < taskNum || taskNum < 1) {
+        if (listOfTasks.size() < taskNum || taskNum < 1) {
             throw new IllegalArgumentException();
         }
-        list.get(taskNum - 1).unmark();
+        listOfTasks.get(taskNum - 1).unmark();
     }
     /**
      * Removes and returns the task at the specified one-based task number.
@@ -58,10 +53,26 @@ public class TodoList {
      * @throws IllegalArgumentException if the task number is outside this list
      */
     public Task deleteTask(int taskNum) {
-        if (list.size() < taskNum || taskNum < 1) {
+        if (listOfTasks.size() < taskNum || taskNum < 1) {
             throw new IllegalArgumentException();
         }
-        return this.list.remove(taskNum - 1);
+        return this.listOfTasks.remove(taskNum - 1);
+    }
+
+    /**
+     *
+     * @param keyword the keyword used to find matching task descriptions
+     * @return a TodoList that has all Tasks in the calling TodoList with
+     * descriptions containing the keyword
+     */
+    public TodoList findSearchList(String keyword) {
+        TodoList searchList = new TodoList();
+        for (Task currentTask : this.listOfTasks) {
+            if (currentTask.getDesc().contains(keyword)) {
+                searchList.addToList(currentTask);
+            }
+        }
+        return searchList;
     }
     /**
      * Returns the tasks in this list.
@@ -69,7 +80,7 @@ public class TodoList {
      * @return the list that stores the tasks
      */
     public ArrayList<Task> getList() {
-        return this.list;
+        return this.listOfTasks;
     }
     /**
      * Returns the task at the specified zero-based index.
@@ -78,7 +89,7 @@ public class TodoList {
      * @return the task at the given index
      */
     public Task getTask(int index){
-        return this.list.get(index);
+        return this.listOfTasks.get(index);
     }
     /**
      * Returns a numbered, formatted representation of this task list.
@@ -87,11 +98,14 @@ public class TodoList {
      */
     @Override
     public String toString() {
-        int len = list.size();
+        int len = listOfTasks.size();
+
         String output = "";
+
         for (int i = 0; i < len; i ++) {
-            Task currentTask = list.get(i);
-            output += String.format("%d. %s\n", i + 1,
+            Task currentTask = listOfTasks.get(i);
+            output += String.format("%d. %s\n",
+                    i + 1,
                     currentTask);
         }
         return LINE + output + ENDLINE;
@@ -101,7 +115,7 @@ public class TodoList {
      *
      * @return the task count
      */
-    public int getSize() {
-        return list.size();
+    protected int getSize() {
+        return listOfTasks.size();
     }
 }

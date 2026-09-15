@@ -2,6 +2,7 @@ package echo;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 /**
  * Represents a task with a description and completion status.
@@ -61,8 +62,13 @@ public class Task {
      * @return this task's storage representation
      */
     public String toStorageFormat() {
-        return String.join(" // ", new String[]{"T", String.valueOf(isDone),
-                description});
+        return String.join(" // ",
+                new String[]{
+                        "T",
+                        String.valueOf(isDone),
+                        description
+                }
+        );
     }
     /**
      * Returns the formatted representation shown to the user.
@@ -80,12 +86,15 @@ public class Task {
  */
 class Todo extends Task {
     String taskMarker = "[T]";
+
     public Todo(String desc) {
         super(desc);
     }
     @Override
     public String toString() {
-        return String.format("%s%s %s", this.taskMarker, super.getStatusMarker(),
+        return String.format("%s%s %s",
+                this.taskMarker,
+                super.getStatusMarker(),
                 super.getDesc());
     }
 }
@@ -95,10 +104,13 @@ class Todo extends Task {
  */
 class Deadline extends Task {
     String taskMarker = "[D]";
-    LocalDate deadlineDate;
-    String formattedDate;
+
     String deadline;
     String time = "";
+
+    LocalDate deadlineDate;
+
+    String formattedDate;
 
     public Deadline(String... taskArgs) {
         super(taskArgs[0]);
@@ -106,8 +118,13 @@ class Deadline extends Task {
             throw new InvalidCommandException();
         }
         this.deadline = taskArgs[1];
-        this.deadlineDate = LocalDate.parse(deadline);
+        try {
+            this.deadlineDate = LocalDate.parse(deadline);
+        } catch (DateTimeParseException dateTimeParseException) {
+            throw new InvalidCommandException();
+        }
         if (taskArgs.length > 2) {
+            this.time = taskArgs[2];
             int timeInt = Integer.parseInt(time);
             this.formattedDate = this.deadlineDate
                     .atTime(Math.floorDiv(timeInt, 100), timeInt % 100)
@@ -120,13 +137,23 @@ class Deadline extends Task {
 
     @Override
     public String toString() {
-        return String.format("%s%s %s (By: %s)", this.taskMarker, this.getStatusMarker(),
-                super.getDesc(), this.formattedDate);
+        return String.format("%s%s %s (By: %s)",
+                this.taskMarker,
+                this.getStatusMarker(),
+                super.getDesc(),
+                this.formattedDate);
     }
     @Override
     public String toStorageFormat() {
-        return String.join(" // ", new String[]{"D", super.getStatus(),
-                super.getDesc(), deadline, time});
+        return String.join(" // ",
+                new String[]{
+                    "D",
+                    super.getStatus(),
+                    super.getDesc(),
+                    deadline,
+                    time
+                }
+        );
     }
 }
 
@@ -135,14 +162,17 @@ class Deadline extends Task {
  */
 class Event extends Task {
     String taskMarker = "[E]";
-    String formattedFromDate;
-    String formattedToDate;
+
     String from;
     String to;
     String fromTime;
     String toTime;
+
     LocalDate fromDate;
     LocalDate toDate;
+
+    String formattedFromDate;
+    String formattedToDate;
 
     public Event(String... taskArgs) {
         super(taskArgs[0]);
@@ -151,13 +181,19 @@ class Event extends Task {
         }
         this.from = taskArgs[1];
         this.to = taskArgs[2];
-        this.fromDate = LocalDate.parse(from);
-        this.toDate = LocalDate.parse(to);
+        try {
+            this.fromDate = LocalDate.parse(from);
+            this.toDate = LocalDate.parse(to);
+        } catch (DateTimeParseException dateTimeParseException) {
+            throw new InvalidCommandException();
+        }
         if (taskArgs.length >= 5) {
             this.fromTime = taskArgs[3];
             this.toTime = taskArgs[4];
+
             int fromTimeInt = Integer.parseInt(fromTime);
             int toTimeInt = Integer.parseInt(toTime);
+
             this.formattedFromDate = this.fromDate
                     .atTime(Math.floorDiv(fromTimeInt, 100), fromTimeInt % 100)
                     .format(DateTimeFormatter.ofPattern("dd MMM yyyy hhmma"));
@@ -172,12 +208,25 @@ class Event extends Task {
 
     @Override
     public String toString() {
-        return String.format("%s%s %s (from: %s to: %s)", this.taskMarker, this.getStatusMarker(),
-                super.getDesc(), this.formattedFromDate, this.formattedToDate);
+        return String.format("%s%s %s (from: %s to: %s)",
+                this.taskMarker,
+                this.getStatusMarker(),
+                super.getDesc(),
+                this.formattedFromDate,
+                this.formattedToDate);
     }
     @Override
     public String toStorageFormat() {
-        return String.join(" // ", new String[]{"E", super.getStatus(),
-                super.getDesc(), this.from, this.to});
+        return String.join(" // ",
+                new String[]{
+                    "E",
+                    super.getStatus(),
+                    super.getDesc(),
+                    this.from,
+                    this.to,
+                    this.fromTime,
+                    this.toTime
+                }
+        );
     }
 }
