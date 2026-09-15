@@ -10,7 +10,6 @@ import java.time.DateTimeException;
  * {@code bye} command.</p>
  */
 public class Echo {
-    private static boolean endSession = false;
     private TodoList todoList = new TodoList();
     protected Storage store = new Storage("testdata.txt", todoList);
     private Ui ui = new Ui();
@@ -44,6 +43,7 @@ public class Echo {
          * @return the matching command word, or {@link #INVALID} when no command matches
          */
         public static CommandWord fromString(String input) {
+            assert input != null;
             for (CommandWord cmdword : values()) {
                 if (cmdword.cmd.equals(input)) {
                     return cmdword;
@@ -55,12 +55,12 @@ public class Echo {
 
     protected String getResponse(String input) {
         try {
+            assert input != null;
             String[] commandArgs = parser.parseInput(input);
             String command = commandArgs[0];
             CommandWord cmdword = CommandWord.fromString(command);
             switch (cmdword) {
                 case BYE -> {
-                    endSession = true;
                     return Ui.getFarewell();
                 }
                 case LIST -> {
@@ -70,7 +70,6 @@ public class Echo {
                     try {
                         int taskNum = parser.parseTaskNum();
                         this.todoList.markList(taskNum);
-                        // ui.printMark(todoList.getTask(taskNum - 1), true);
                         store.writeData(todoList.getList());
                         return ui.getMarkString(todoList.getTask(taskNum - 1), true);
                     } catch (IllegalArgumentException e) {
@@ -92,7 +91,6 @@ public class Echo {
                         String desc = parser.parseTask(input, command)[0];
                         Todo newTask = new Todo(desc);
                         this.todoList.addToList(newTask);
-                        // ui.printAddedTask(newTask, cmdword.toString());
                         store.writeData(todoList.getList());
                         return ui.getAddedTaskString(newTask, cmdword.toString());
                     } catch (IllegalArgumentException | StringIndexOutOfBoundsException e) {
@@ -102,9 +100,9 @@ public class Echo {
                 case DEADLINE -> {
                     try {
                         String[] taskArgs = parser.parseTask(input, command);
+                        assert taskArgs.length > 1;
                         Deadline newTask = new Deadline(taskArgs);
                         this.todoList.addToList(newTask);
-                        // ui.printAddedTask(newTask, cmdword.toString());
                         store.writeData(todoList.getList());
                         return ui.getAddedTaskString(newTask, cmdword.toString());
                     } catch (IllegalArgumentException | StringIndexOutOfBoundsException | DateTimeException e) {
@@ -114,9 +112,9 @@ public class Echo {
                 case EVENT -> {
                     try {
                         String[] taskArgs = parser.parseTask(input, command);
+                        assert taskArgs.length > 1;
                         Task newTask = new Event(taskArgs);
                         this.todoList.addToList(newTask);
-                        // ui.printAddedTask(newTask, cmdword.toString());
                         store.writeData(todoList.getList());
                         return ui.getAddedTaskString(newTask, cmdword.toString());
                     } catch (IllegalArgumentException | StringIndexOutOfBoundsException | DateTimeException e) {
@@ -126,10 +124,10 @@ public class Echo {
                 case DELETE -> {
                     try {
                         int taskNum = parser.parseTaskNum();
-                        Task deletedTask = todoList.deleteTask(taskNum);
                         int listSize = todoList.getSize();
-                        // ui.printDeleteTask(deletedTask, listSize);
+                        Task deletedTask = todoList.deleteTask(taskNum);
                         store.writeData(todoList.getList());
+                        assert todoList.getSize() < listSize;
                         return ui.getDeleteTask(deletedTask, listSize);
                     } catch (IllegalArgumentException | StringIndexOutOfBoundsException e) {
                         return "Invalid input for delete. Example usage: delete 2";
@@ -146,6 +144,7 @@ public class Echo {
                                 searchList.addToList(currentTask);
                             }
                         }
+                        assert searchList.getSize() <= todoList.getSize();
                         return ui.getSearchListString(searchList);
                     } catch (IllegalArgumentException | StringIndexOutOfBoundsException e) {
                         return "Invalid input for find. Example usage: find book";
@@ -155,7 +154,6 @@ public class Echo {
         }
         catch (InvalidCommandException e) {
             return ui.getInvalidCommandMessage();
-            //this.start();
         }
         return ui.getInvalidCommandMessage();
     }
@@ -216,8 +214,7 @@ class Parser {
                 .substring(command.length() + 1).split(" ");
         if (commandArgs.length >= 1) {
             return String.join(" ", commandArgs);
-        }
-        else {
+        } else {
             throw new InvalidCommandException();
         }
     }
@@ -245,11 +242,5 @@ class Parser {
 }
 
 class InvalidCommandException extends IllegalArgumentException {
-    public InvalidCommandException(String message) {
-        super(message);
-    }
-
-    public InvalidCommandException() {
-    }
 }
 

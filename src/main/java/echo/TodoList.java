@@ -11,17 +11,12 @@ public class TodoList {
     private static final String ENDLINE = "\n" + "-".repeat(30);
 
     /**
-     * Creates an empty task list.
-     */
-    public TodoList() {
-    };
-
-    /**
      * Adds a task to the end of this list.
      *
      * @param item the task to add
      */
     public void addToList(Task item) {
+        assert item != null;
         list.add(item);
         System.out.println(String.format("\nThere are now %d items in the list",
                 list.size()));

@@ -108,6 +108,7 @@ class Deadline extends Task {
         this.deadline = taskArgs[1];
         this.deadlineDate = LocalDate.parse(deadline);
         if (taskArgs.length > 2) {
+            this.time = taskArgs[2];
             int timeInt = Integer.parseInt(time);
             this.formattedDate = this.deadlineDate
                     .atTime(Math.floorDiv(timeInt, 100), timeInt % 100)

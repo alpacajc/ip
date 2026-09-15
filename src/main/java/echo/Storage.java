@@ -16,10 +16,6 @@ public class Storage {
         this.todoList = todoList;
     }
 
-    public void fileExists() {
-        System.out.println("File exists: " + listFile.exists());
-    }
-
     public void readData() {
         if (listFile.exists()) {
             System.out.println(listFile.getName() + " already exists");
@@ -27,11 +23,13 @@ public class Storage {
                 Scanner fileReader = new Scanner(listFile);
                 while (fileReader.hasNext()) {
                     String nextLine = fileReader.nextLine();
+                    assert nextLine != null;
                     String[] taskArgs = nextLine.split(" // ");
                     if (taskArgs.length < 3) {
                         continue;
                     }
                     String taskType = taskArgs[0];
+                    assert taskType.length() == 1;
                     String markedString = taskArgs[1];
                     boolean marked = Boolean.parseBoolean(markedString);
                     String taskDesc = taskArgs[2];
@@ -41,8 +39,7 @@ public class Storage {
                             currentTask.mark();
                         }
                         todoList.addToList(currentTask);
-                    }
-                    else if (taskType.equals("D")) {
+                    } else if (taskType.equals("D")) {
                         String deadline = taskArgs[3];
                         Task currentTask = new Deadline(taskDesc, deadline);
                         if (taskArgs.length > 4) {
@@ -53,8 +50,7 @@ public class Storage {
                             currentTask.mark();
                         }
                         todoList.addToList(currentTask);
-                    }
-                    else if (taskType.equals("E")) {
+                    } else if (taskType.equals("E")) {
                         Task currentTask;
                         if (taskArgs.length > 6) {
                             String from = taskArgs[3];
@@ -72,6 +68,9 @@ public class Storage {
                             currentTask.mark();
                         }
                         todoList.addToList(currentTask);
+                    }
+                    else {
+                        assert false;
                     }
                 }
             }
@@ -91,6 +90,7 @@ public class Storage {
     public void writeData(ArrayList<Task> taskList) {
         try {
             FileWriter fw = new FileWriter(listFile);
+            assert taskList != null;
             for (Task task : taskList) {
                 fw.write(task.toStorageFormat() + "\n");
             }
