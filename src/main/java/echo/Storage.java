@@ -18,7 +18,7 @@ public class Storage {
         this.todoList = todoList;
     }
 
-    /**
+   /**
      * Reads the stored tasks from the storage text file if it exists
      * and puts them in the TodoList in Echo.
      * If the storage file does not exist, it creates the storage text file.
@@ -29,10 +29,15 @@ public class Storage {
             while (fileReader.hasNext()) {
                 String nextLine = fileReader.nextLine();
 
+                assert nextLine != null;
+
                 String[] storedTaskArgs = nextLine.split(" // ");
                 String input = String.join(" /", storedTaskArgs);
 
                 String taskType = storedTaskArgs[0];
+                
+		assert taskType.length() == 1;
+
                 String markedString = storedTaskArgs[1];
 
                 boolean marked = Boolean.parseBoolean(markedString);
@@ -51,6 +56,8 @@ public class Storage {
                     String[] taskArgs = Parser.getStoredTaskArgs(input, taskType);
                     currentTask = new Event(taskArgs);
                     todoList.addToList(currentTask);
+                } else {
+                    assert false;
                 }
 
                 if (marked && currentTask != null) {
@@ -76,7 +83,10 @@ public class Storage {
      */
     public void writeData(ArrayList<Task> taskList) {
         try {
+            assert taskList != null;
+
             FileWriter fw = new FileWriter(this.listFile);
+
             for (Task task : taskList) {
                 fw.write(task.toStorageFormat() + "\n");
             }

@@ -42,6 +42,7 @@ public class Echo {
          * @return the matching command word, or {@link #INVALID} when no command matches
          */
         public static CommandWord fromString(String input) {
+            assert input != null;
             for (CommandWord cmdword : values()) {
                 if (cmdword.cmd.equals(input)) {
                     return cmdword;
@@ -58,6 +59,8 @@ public class Echo {
      * @return Echo's text response to input commands in the form of a String
      */
     protected String getResponse(String input) {
+        assert input != null;
+
         String[] commandArgs = Parser.convertInputToArgs(input);
         String command = commandArgs[0];
 
@@ -73,7 +76,7 @@ public class Echo {
                     return ui.getListString(this.todoList);
                 }
                 case MARK -> {
-                    int taskNum = Parser.getTaskNum(todoListSize, commandArgs);
+                   int taskNum = Parser.getTaskNum(todoListSize, commandArgs);
                     this.todoList.markList(taskNum);
                     store.writeData(todoList.getList());
                     return ui.getMarkString(todoList.getTask(taskNum - 1), true);
@@ -94,6 +97,7 @@ public class Echo {
                 }
                 case DEADLINE -> {
                     String[] taskArgs = Parser.getTaskArgs(input, command);
+                    assert taskArgs.length > 1;
                     Deadline newTask = new Deadline(taskArgs);
                     this.todoList.addToList(newTask);
                     store.writeData(todoList.getList());
@@ -101,6 +105,7 @@ public class Echo {
                 }
                 case EVENT -> {
                     String[] taskArgs = Parser.getTaskArgs(input, command);
+                    assert taskArgs.length > 1;
                     Task newTask = new Event(taskArgs);
                     this.todoList.addToList(newTask);
                     store.writeData(todoList.getList());
@@ -110,12 +115,14 @@ public class Echo {
                     int taskNum = Parser.getTaskNum(todoListSize, commandArgs);
                     Task deletedTask = todoList.deleteTask(taskNum);
                     int listSize = todoList.getSize();
+                    assert todoList.getSize() < listSize;
                     store.writeData(todoList.getList());
                     return ui.getDeleteTask(deletedTask, listSize);
                 }
                 case FIND -> {
                     String keyword = Parser.getKeyword(input, command);
                     TodoList searchList = todoList.findSearchList(keyword);
+                    assert searchList.getSize() <= todoList.getSize();
                     return ui.getSearchListString(searchList);
                 }
                 default -> {
@@ -187,8 +194,7 @@ class Parser {
                 .substring(command.length() + 1).split(" ");
         if (commandArgs.length >= 1) {
             return String.join(" ", commandArgs);
-        }
-        else {
+        } else {
             throw new InvalidCommandException();
         }
     }

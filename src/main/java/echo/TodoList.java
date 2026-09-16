@@ -17,6 +17,8 @@ public class TodoList {
      * @param item the task to add
      */
     public void addToList(Task item) {
+        assert item != null;
+
         listOfTasks.add(item);
         System.out.println(String.format("\nThere are now %d items in the list",
                 listOfTasks.size()));
