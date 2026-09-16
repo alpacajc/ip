@@ -1,6 +1,6 @@
 package echo;
 
-import java.time.DateTimeException;
+import java.util.ArrayList;
 
 /**
  * Runs the Echo command-line task manager.
@@ -13,12 +13,11 @@ public class Echo {
     private TodoList todoList = new TodoList();
     protected Storage store = new Storage("testdata.txt", todoList);
     private Ui ui = new Ui();
-    private Parser parser = new Parser();
 
     /**
      * Represents the command words supported by Echo.
      */
-    public enum CommandWord {
+    protected enum CommandWord {
         BYE("bye"),
         LIST("list"),
         MARK("mark"),
@@ -53,11 +52,21 @@ public class Echo {
         }
     }
 
+    /**
+     * Parses and interprets user input, then handles the primary logic of what the user input does.
+     *
+     * @param input the input entered by the user
+     * @return Echo's text response to input commands in the form of a String
+     */
     protected String getResponse(String input) {
+        assert input != null;
+
+        String[] commandArgs = Parser.convertInputToArgs(input);
+        String command = commandArgs[0];
+
+        int todoListSize = todoList.getSize();
+
         try {
-            assert input != null;
-            String[] commandArgs = parser.parseInput(input);
-            String command = commandArgs[0];
             CommandWord cmdword = CommandWord.fromString(command);
             switch (cmdword) {
                 case BYE -> {
@@ -67,107 +76,77 @@ public class Echo {
                     return ui.getListString(this.todoList);
                 }
                 case MARK -> {
-                    try {
-                        int taskNum = parser.parseTaskNum();
-                        this.todoList.markList(taskNum);
-                        store.writeData(todoList.getList());
-                        return ui.getMarkString(todoList.getTask(taskNum - 1), true);
-                    } catch (IllegalArgumentException e) {
-                        return "Invalid input for mark. Example usage: mark 2";
-                    }
+                   int taskNum = Parser.getTaskNum(todoListSize, commandArgs);
+                    this.todoList.markList(taskNum);
+                    store.writeData(todoList.getList());
+                    return ui.getMarkString(todoList.getTask(taskNum - 1), true);
                 }
                 case UNMARK -> {
-                    try {
-                        int taskNum = parser.parseTaskNum();
-                        this.todoList.unmarkList(taskNum);
-                        store.writeData(todoList.getList());
-                        return ui.getMarkString(todoList.getTask(taskNum - 1), false);
-                    } catch (IllegalArgumentException e) {
-                        return "Invalid input for unmark. Example usage: unmark 2";
-                    }
+                    int taskNum = Parser.getTaskNum(todoListSize, commandArgs);
+                    this.todoList.unmarkList(taskNum);
+                    store.writeData(todoList.getList());
+                    return ui.getMarkString(todoList.getTask(taskNum - 1), false);
+
                 }
                 case TODO -> {
-                    try {
-                        String desc = parser.parseTask(input, command)[0];
-                        Todo newTask = new Todo(desc);
-                        this.todoList.addToList(newTask);
-                        store.writeData(todoList.getList());
-                        return ui.getAddedTaskString(newTask, cmdword.toString());
-                    } catch (IllegalArgumentException | StringIndexOutOfBoundsException e) {
-                         return "Invalid input for todo. Example usage: todo Example";
-                    }
+                    String desc = Parser.getTaskArgs(input, command)[0];
+                    Todo newTask = new Todo(desc);
+                    this.todoList.addToList(newTask);
+                    store.writeData(todoList.getList());
+                    return ui.getAddedTaskString(newTask, cmdword.toString());
                 }
                 case DEADLINE -> {
-                    try {
-                        String[] taskArgs = parser.parseTask(input, command);
-                        assert taskArgs.length > 1;
-                        Deadline newTask = new Deadline(taskArgs);
-                        this.todoList.addToList(newTask);
-                        store.writeData(todoList.getList());
-                        return ui.getAddedTaskString(newTask, cmdword.toString());
-                    } catch (IllegalArgumentException | StringIndexOutOfBoundsException | DateTimeException e) {
-                        return "Invalid input for deadline. Example usage: deadline Example /2023-12-13";
-                    }
+                    String[] taskArgs = Parser.getTaskArgs(input, command);
+                    assert taskArgs.length > 1;
+                    Deadline newTask = new Deadline(taskArgs);
+                    this.todoList.addToList(newTask);
+                    store.writeData(todoList.getList());
+                    return ui.getAddedTaskString(newTask, cmdword.toString());
                 }
                 case EVENT -> {
-                    try {
-                        String[] taskArgs = parser.parseTask(input, command);
-                        assert taskArgs.length > 1;
-                        Task newTask = new Event(taskArgs);
-                        this.todoList.addToList(newTask);
-                        store.writeData(todoList.getList());
-                        return ui.getAddedTaskString(newTask, cmdword.toString());
-                    } catch (IllegalArgumentException | StringIndexOutOfBoundsException | DateTimeException e) {
-                        return "Invalid input for event. Example usage: event Example /2023-12-13 /2023-12-14";
-                    }
+                    String[] taskArgs = Parser.getTaskArgs(input, command);
+                    assert taskArgs.length > 1;
+                    Task newTask = new Event(taskArgs);
+                    this.todoList.addToList(newTask);
+                    store.writeData(todoList.getList());
+                    return ui.getAddedTaskString(newTask, cmdword.toString());
                 }
                 case DELETE -> {
-                    try {
-                        int taskNum = parser.parseTaskNum();
-                        int listSize = todoList.getSize();
-                        Task deletedTask = todoList.deleteTask(taskNum);
-                        store.writeData(todoList.getList());
-                        assert todoList.getSize() < listSize;
-                        return ui.getDeleteTask(deletedTask, listSize);
-                    } catch (IllegalArgumentException | StringIndexOutOfBoundsException e) {
-                        return "Invalid input for delete. Example usage: delete 2";
-                    }
+                    int taskNum = Parser.getTaskNum(todoListSize, commandArgs);
+                    Task deletedTask = todoList.deleteTask(taskNum);
+                    int listSize = todoList.getSize();
+                    assert todoList.getSize() < listSize;
+                    store.writeData(todoList.getList());
+                    return ui.getDeleteTask(deletedTask, listSize);
                 }
                 case FIND -> {
-                    try {
-                        String keyword = parser.parseKeyword(input, command);
-                        int listSize = todoList.getSize();
-                        TodoList searchList = new TodoList();
-                        for (int i = 0; i < listSize; i++) {
-                            Task currentTask = todoList.getList().get(i);
-                            if (currentTask.getDesc().contains(keyword)) {
-                                searchList.addToList(currentTask);
-                            }
-                        }
-                        assert searchList.getSize() <= todoList.getSize();
-                        return ui.getSearchListString(searchList);
-                    } catch (IllegalArgumentException | StringIndexOutOfBoundsException e) {
-                        return "Invalid input for find. Example usage: find book";
-                    }
+                    String keyword = Parser.getKeyword(input, command);
+                    TodoList searchList = todoList.findSearchList(keyword);
+                    assert searchList.getSize() <= todoList.getSize();
+                    return ui.getSearchListString(searchList);
+                }
+                default -> {
+                    throw new InvalidCommandException();
                 }
             }
+        } catch (InvalidCommandException e) {
+            return ui.getInvalidCommandMessage(command);
         }
-        catch (InvalidCommandException e) {
-            return ui.getInvalidCommandMessage();
-        }
-        return ui.getInvalidCommandMessage();
     }
 
     /**
      * Starts Echo by loading saved tasks, displaying a welcome message, and processing commands.
+     * From an earlier version of Echo, currently unused.
      *
      * @param args command-line arguments; Echo does not use them
      */
     public static void main(String[] args) {
-        /* Echo echo = new Echo();
+        /*
+        Echo echo = new Echo();
         echo.store.readData();
         Ui.printWelcome();
-        //echo.start(); */
+        echo.start();
+        */
     }
 }
 
@@ -176,19 +155,15 @@ public class Echo {
  */
 class Parser {
 
-    /** Stores the arguments from the most recently parsed command. */
-    String[] commandArgs;
-
     /**
      * Splits an input line into arguments and converts the command to lowercase.
      *
      * @param input the user input to parse
      * @return the command and its arguments
      */
-    public String[] parseInput(String input) {
+    public static String[] convertInputToArgs(String input) {
         String[] commandArgs = input.trim().split(" ");
         commandArgs[0] = commandArgs[0].toLowerCase();
-        this.commandArgs = commandArgs;
         return commandArgs;
     }
 
@@ -199,14 +174,19 @@ class Parser {
      * @throws InvalidCommandException if the command does not include a task number
      * @throws NumberFormatException if the task number is not a valid integer
      */
-    public int parseTaskNum() throws InvalidCommandException {
-        if (commandArgs.length > 1) {
-            return Integer.parseInt(commandArgs[1]);
-        } else {
+    public static int getTaskNum(int todoListSize, String[] commandArgs) throws InvalidCommandException {
+        try {
+            int taskNum = Integer.parseInt(commandArgs[1]);
+            if (taskNum > todoListSize) {
+                throw new InvalidCommandException();
+            }
+            return taskNum;
+        } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
             throw new InvalidCommandException();
         }
     }
-    public String parseKeyword(String input, String command) throws InvalidCommandException {
+
+    public static String getKeyword(String input, String command) throws InvalidCommandException {
         if (input.equals(command)) {
             throw new InvalidCommandException();
         }
@@ -220,14 +200,14 @@ class Parser {
     }
 
     /**
-     * Extracts a task description and any slash-prefixed details from a command.
+     * Extracts the task arguments without any slash-prefixed details from a task-creating command.
      *
      * @param input the complete user input
      * @param command the command prefix to remove from the input
      * @return the description and optional details, split at {@code " /"}
      * @throws InvalidCommandException if the command has no task description
      */
-    public String[] parseTask(String input, String command) throws InvalidCommandException {
+    public static String[] getTaskArgs(String input, String command) throws InvalidCommandException {
         if (input.trim().equals(command)) {
             throw new InvalidCommandException();
         }
@@ -235,6 +215,33 @@ class Parser {
                 .substring(command.length() + 1).split(" /");
         if (commandArgs.length >= 1) {
             return commandArgs;
+        } else {
+            throw new InvalidCommandException();
+        }
+    }
+
+    /**
+     * Extracts the task arguments without any double slash-prefixed details from the storage text file.
+     *
+     * @param input the task in storage format
+     * @param command the command prefix to remove from the input
+     * @return the description and optional details, split at {@code " // "}
+     * @throws InvalidCommandException if the stored task is invalid
+     */
+    public static String[] getStoredTaskArgs(String input, String command) throws InvalidCommandException {
+        if (input.trim().equals(command)) {
+            throw new InvalidCommandException();
+        }
+        String[] commandArgs = input.trim()
+                .substring(command.length() + 1).split(" /");
+        if (commandArgs.length >= 2) {
+            ArrayList<String> taskArgs= new ArrayList<String>();
+            for (int i = 1; i < commandArgs.length; i++) {
+                if (!commandArgs[i].equals("null")) {
+                    taskArgs.add(commandArgs[i]);
+                }
+            }
+            return taskArgs.toArray(String[]::new);
         } else {
             throw new InvalidCommandException();
         }
