@@ -1,6 +1,7 @@
 package echo;
 
 import java.util.ArrayList;
+import java.util.ArrayDeque;
 
 /**
  * Runs the Echo command-line task manager.
@@ -10,9 +11,13 @@ import java.util.ArrayList;
  * {@code bye} command.</p>
  */
 public class Echo {
-    private TodoList todoList = new TodoList();
+    private TodoList todoList = new TodoList(this);
     protected Storage store = new Storage("testdata.txt", todoList);
     private Ui ui = new Ui();
+
+    private final int undoLimit = 1;
+    private final int numSavedStates = undoLimit + 1;
+    protected ArrayDeque<Runnable> previousActions = new ArrayDeque<Runnable>(numSavedStates);
 
     /**
      * Represents the command words supported by Echo.
@@ -27,6 +32,7 @@ public class Echo {
         EVENT("event"),
         DELETE("delete"),
         FIND("find"),
+        UNDO("undo"),
         INVALID("invalid");
 
         public String cmd;
@@ -66,6 +72,12 @@ public class Echo {
 
         int todoListSize = todoList.getSize();
 
+        if (previousActions.size() > numSavedStates) {
+            previousActions.pop();
+        }
+
+        System.out.println(previousActions);
+
         try {
             CommandWord cmdword = CommandWord.fromString(command);
             switch (cmdword) {
@@ -76,23 +88,22 @@ public class Echo {
                     return ui.getListString(this.todoList);
                 }
                 case MARK -> {
-                   int taskNum = Parser.getTaskNum(todoListSize, commandArgs);
+                    int taskNum = Parser.getTaskNum(todoListSize, commandArgs);
                     this.todoList.markList(taskNum);
-                    store.writeData(todoList.getList());
+                    this.store.writeData(this.todoList.getList());
                     return ui.getMarkString(todoList.getTask(taskNum - 1), true);
                 }
                 case UNMARK -> {
                     int taskNum = Parser.getTaskNum(todoListSize, commandArgs);
                     this.todoList.unmarkList(taskNum);
-                    store.writeData(todoList.getList());
+                    this.store.writeData(this.todoList.getList());
                     return ui.getMarkString(todoList.getTask(taskNum - 1), false);
-
                 }
                 case TODO -> {
                     String desc = Parser.getTaskArgs(input, command)[0];
                     Todo newTask = new Todo(desc);
                     this.todoList.addToList(newTask);
-                    store.writeData(todoList.getList());
+                    this.store.writeData(this.todoList.getList());
                     return ui.getAddedTaskString(newTask, cmdword.toString());
                 }
                 case DEADLINE -> {
@@ -100,7 +111,7 @@ public class Echo {
                     assert taskArgs.length > 1;
                     Deadline newTask = new Deadline(taskArgs);
                     this.todoList.addToList(newTask);
-                    store.writeData(todoList.getList());
+                    this.store.writeData(this.todoList.getList());
                     return ui.getAddedTaskString(newTask, cmdword.toString());
                 }
                 case EVENT -> {
@@ -108,22 +119,26 @@ public class Echo {
                     assert taskArgs.length > 1;
                     Task newTask = new Event(taskArgs);
                     this.todoList.addToList(newTask);
-                    store.writeData(todoList.getList());
+                    this.store.writeData(this.todoList.getList());
                     return ui.getAddedTaskString(newTask, cmdword.toString());
                 }
                 case DELETE -> {
                     int taskNum = Parser.getTaskNum(todoListSize, commandArgs);
-                    Task deletedTask = todoList.deleteTask(taskNum);
-                    int listSize = todoList.getSize();
-                    assert todoList.getSize() < listSize;
-                    store.writeData(todoList.getList());
+                    Task deletedTask = this.todoList.deleteTask(taskNum);
+                    int listSize = this.todoList.getSize();
+                    assert this.todoList.getSize() < todoListSize;
+                    this.store.writeData(this.todoList.getList());
                     return ui.getDeleteTask(deletedTask, listSize);
                 }
                 case FIND -> {
                     String keyword = Parser.getKeyword(input, command);
-                    TodoList searchList = todoList.findSearchList(keyword);
-                    assert searchList.getSize() <= todoList.getSize();
+                    TodoList searchList = this.todoList.findSearchList(keyword);
+                    assert searchList.getSize() <= this.todoList.getSize();
                     return ui.getSearchListString(searchList);
+                }
+                case UNDO -> {
+                    previousActions.pop().run();
+                    return "undid the previous command.";
                 }
                 default -> {
                     throw new InvalidCommandException();
@@ -132,21 +147,6 @@ public class Echo {
         } catch (InvalidCommandException e) {
             return ui.getInvalidCommandMessage(command);
         }
-    }
-
-    /**
-     * Starts Echo by loading saved tasks, displaying a welcome message, and processing commands.
-     * From an earlier version of Echo, currently unused.
-     *
-     * @param args command-line arguments; Echo does not use them
-     */
-    public static void main(String[] args) {
-        /*
-        Echo echo = new Echo();
-        echo.store.readData();
-        Ui.printWelcome();
-        echo.start();
-        */
     }
 }
 

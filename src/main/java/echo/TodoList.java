@@ -11,6 +11,18 @@ public class TodoList {
     private static final String LINE = "\n" + "-".repeat(30) + "\n";
     private static final String ENDLINE = "\n" + "-".repeat(30);
 
+    private Echo echo;
+
+    public TodoList() {
+    }
+    /**
+     * Creates a TodoList storing a reference to an Echo object
+     *
+     * @param echo the Echo object whose reference is to be stored in the newly created TodoList
+     */
+    public TodoList(Echo echo) {
+        this.echo = echo;
+    }
     /**
      * Adds a task to the end of this list.
      *
@@ -20,8 +32,22 @@ public class TodoList {
         assert item != null;
 
         listOfTasks.add(item);
+
+        // Adds the reverse of this action to the previousActions stack so it can be undone with undo
+        this.echo.previousActions.push(() -> this.listOfTasks.remove(item));
+
         System.out.println(String.format("\nThere are now %d items in the list",
                 listOfTasks.size()));
+    }
+    /**
+     * Adds a task to the end of this list. Used when reading data from storage.
+     *
+     * @param item the task to add
+     */
+    public void addToListFromStorage(Task item) {
+        assert item != null;
+
+        listOfTasks.add(item);
     }
     /**
      * Marks the specified one-based task number as complete.
@@ -33,7 +59,12 @@ public class TodoList {
         if (listOfTasks.size() < taskNum || taskNum < 1) {
             throw new IllegalArgumentException();
         }
-        listOfTasks.get(taskNum - 1).mark();
+        Task targetTask = listOfTasks.get(taskNum - 1);
+        if (Boolean.parseBoolean(targetTask.getStatus())) {
+            return;
+        }
+        targetTask.mark();
+        this.echo.previousActions.push(() -> targetTask.unmark());
     }
     /**
      * Marks the specified one-based task number as incomplete.
@@ -45,7 +76,12 @@ public class TodoList {
         if (listOfTasks.size() < taskNum || taskNum < 1) {
             throw new IllegalArgumentException();
         }
-        listOfTasks.get(taskNum - 1).unmark();
+        Task targetTask = listOfTasks.get(taskNum - 1);
+        if (!Boolean.parseBoolean(targetTask.getStatus())) {
+            return;
+        }
+        targetTask.unmark();
+        this.echo.previousActions.push(() -> targetTask.mark());
     }
     /**
      * Removes and returns the task at the specified one-based task number.
@@ -58,6 +94,14 @@ public class TodoList {
         if (listOfTasks.size() < taskNum || taskNum < 1) {
             throw new IllegalArgumentException();
         }
+        Task targetTask = listOfTasks.get(taskNum - 1);
+        echo.previousActions.push(() -> {
+            if (this.getSize() >= taskNum) {
+                this.listOfTasks.add(taskNum - 1, targetTask);
+                return;
+            }
+            this.listOfTasks.add(targetTask);
+        });
         return this.listOfTasks.remove(taskNum - 1);
     }
 

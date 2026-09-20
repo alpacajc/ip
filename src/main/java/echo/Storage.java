@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Storage {
-    public File listFile;
-    TodoList todoList;
+    private File listFile;
+    private TodoList todoList;
 
     public Storage(String filePath, TodoList todoList) {
         this.listFile = new File(filePath);
@@ -19,9 +19,9 @@ public class Storage {
     }
 
    /**
-     * Reads the stored tasks from the storage text file if it exists
-     * and puts them in the TodoList in Echo.
-     * If the storage file does not exist, it creates the storage text file.
+     * <p>Reads the stored tasks from the storage text file if it exists
+     * and puts them in the TodoList in Echo. If the storage file does not exist,
+     * it creates the storage text file.</p>
      */
     public void readData() {
         try {
@@ -47,15 +47,15 @@ public class Storage {
                 if (taskType.equals("T")) {
                     String[] taskArgs = Parser.getStoredTaskArgs(input, taskType);
                     currentTask = new Todo(taskArgs[0]);
-                    todoList.addToList(currentTask);
+                    todoList.addToListFromStorage(currentTask);
                 } else if (taskType.equals("D")) {
                     String[] taskArgs = Parser.getStoredTaskArgs(input, taskType);
                     currentTask = new Deadline(taskArgs);
-                    todoList.addToList(currentTask);
+                    todoList.addToListFromStorage(currentTask);
                 } else if (taskType.equals("E")) {
                     String[] taskArgs = Parser.getStoredTaskArgs(input, taskType);
                     currentTask = new Event(taskArgs);
-                    todoList.addToList(currentTask);
+                    todoList.addToListFromStorage(currentTask);
                 } else {
                     assert false;
                 }
@@ -81,7 +81,7 @@ public class Storage {
      *
      * @param taskList the list of tasks to be added to the storage file.
      */
-    public void writeData(ArrayList<Task> taskList) {
+    protected void writeData(ArrayList<Task> taskList) {
         try {
             assert taskList != null;
 
