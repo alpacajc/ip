@@ -53,11 +53,11 @@ public class TodoList {
      * Marks the specified one-based task number as complete.
      *
      * @param taskNum the one-based number of the task to mark
-     * @throws IllegalArgumentException if the task number is outside this list
+     * @throws InvalidCommandException if the task number is outside this list
      */
-    public void markList(int taskNum) {
+    public void markList(int taskNum) throws InvalidCommandException {
         if (listOfTasks.size() < taskNum || taskNum < 1) {
-            throw new IllegalArgumentException();
+            throw new InvalidCommandException();
         }
         Task targetTask = listOfTasks.get(taskNum - 1);
         if (Boolean.parseBoolean(targetTask.getStatus())) {
@@ -70,11 +70,11 @@ public class TodoList {
      * Marks the specified one-based task number as incomplete.
      *
      * @param taskNum the one-based number of the task to unmark
-     * @throws IllegalArgumentException if the task number is outside this list
+     * @throws InvalidCommandException if the task number is outside this list
      */
-    public void unmarkList(int taskNum) {
+    public void unmarkList(int taskNum) throws InvalidCommandException {
         if (listOfTasks.size() < taskNum || taskNum < 1) {
-            throw new IllegalArgumentException();
+            throw new InvalidCommandException();
         }
         Task targetTask = listOfTasks.get(taskNum - 1);
         if (!Boolean.parseBoolean(targetTask.getStatus())) {
@@ -88,11 +88,11 @@ public class TodoList {
      *
      * @param taskNum the one-based number of the task to remove
      * @return the removed task
-     * @throws IllegalArgumentException if the task number is outside this list
+     * @throws InvalidCommandException if the task number is outside this list
      */
-    public Task deleteTask(int taskNum) {
+    public Task deleteTask(int taskNum) throws InvalidCommandException {
         if (listOfTasks.size() < taskNum || taskNum < 1) {
-            throw new IllegalArgumentException();
+            throw new InvalidCommandException();
         }
         Task targetTask = listOfTasks.get(taskNum - 1);
         echo.previousActions.push(() -> {

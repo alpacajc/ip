@@ -1,5 +1,6 @@
 package echo;
 
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -67,8 +68,7 @@ public class Task {
                         "T",
                         String.valueOf(isDone),
                         description
-                }
-        );
+                });
     }
     /**
      * Returns the formatted representation shown to the user.
@@ -112,7 +112,7 @@ class Deadline extends Task {
 
     String formattedDate;
 
-    public Deadline(String... taskArgs) {
+    public Deadline(String... taskArgs) throws InvalidCommandException {
         super(taskArgs[0]);
         if (taskArgs.length < 2) {
             throw new InvalidCommandException();
@@ -125,10 +125,14 @@ class Deadline extends Task {
         }
         if (taskArgs.length > 2) {
             this.time = taskArgs[2];
-            int timeInt = Integer.parseInt(time);
-            this.formattedDate = this.deadlineDate
-                    .atTime(Math.floorDiv(timeInt, 100), timeInt % 100)
-                    .format(DateTimeFormatter.ofPattern("dd MMM yyyy hhmma"));
+            try {
+                int timeInt = Integer.parseInt(time);
+                this.formattedDate = this.deadlineDate
+                        .atTime(Math.floorDiv(timeInt, 100), timeInt % 100)
+                        .format(DateTimeFormatter.ofPattern("dd MMM yyyy hhmma"));
+            } catch (NumberFormatException | DateTimeException e) {
+                throw new InvalidCommandException();
+            }
         }
         else {
             this.formattedDate = this.deadlineDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy"));
@@ -152,8 +156,7 @@ class Deadline extends Task {
                     super.getDesc(),
                     deadline,
                     time
-                }
-        );
+                });
     }
 }
 
@@ -174,7 +177,7 @@ class Event extends Task {
     String formattedFromDate;
     String formattedToDate;
 
-    public Event(String... taskArgs) {
+    public Event(String... taskArgs) throws InvalidCommandException {
         super(taskArgs[0]);
         if (taskArgs.length < 3) {
             throw new InvalidCommandException();
@@ -184,6 +187,9 @@ class Event extends Task {
         try {
             this.fromDate = LocalDate.parse(from);
             this.toDate = LocalDate.parse(to);
+            if (toDate.isBefore(fromDate)) {
+                throw new InvalidCommandException();
+            }
         } catch (DateTimeParseException dateTimeParseException) {
             throw new InvalidCommandException();
         }
@@ -191,15 +197,23 @@ class Event extends Task {
             this.fromTime = taskArgs[3];
             this.toTime = taskArgs[4];
 
-            int fromTimeInt = Integer.parseInt(fromTime);
-            int toTimeInt = Integer.parseInt(toTime);
+            try {
+                int fromTimeInt = Integer.parseInt(fromTime);
+                int toTimeInt = Integer.parseInt(toTime);
 
-            this.formattedFromDate = this.fromDate
-                    .atTime(Math.floorDiv(fromTimeInt, 100), fromTimeInt % 100)
-                    .format(DateTimeFormatter.ofPattern("dd MMM yyyy hhmma"));
-            this.formattedToDate = this.toDate
-                    .atTime(Math.floorDiv(toTimeInt, 100), toTimeInt % 100)
-                    .format(DateTimeFormatter.ofPattern("dd MMM yyyy hhmma"));
+                if (toTimeInt <= fromTimeInt && this.fromDate.isEqual(this.toDate)) {
+                    throw new InvalidCommandException();
+                }
+
+                this.formattedFromDate = this.fromDate
+                        .atTime(Math.floorDiv(fromTimeInt, 100), fromTimeInt % 100)
+                        .format(DateTimeFormatter.ofPattern("dd MMM yyyy hhmma"));
+                this.formattedToDate = this.toDate
+                        .atTime(Math.floorDiv(toTimeInt, 100), toTimeInt % 100)
+                        .format(DateTimeFormatter.ofPattern("dd MMM yyyy hhmma"));
+            } catch (NumberFormatException | DateTimeException e) {
+                throw new InvalidCommandException();
+            }
         } else {
             this.formattedFromDate = this.fromDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy"));
             this.formattedToDate = this.toDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy"));
@@ -226,7 +240,6 @@ class Event extends Task {
                     this.to,
                     this.fromTime,
                     this.toTime
-                }
-        );
+                });
     }
 }
