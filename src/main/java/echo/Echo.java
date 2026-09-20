@@ -11,12 +11,11 @@ import java.util.ArrayDeque;
  * {@code bye} command.</p>
  */
 public class Echo {
-    private TodoList todoList = new TodoList(this);
+    private final TodoList todoList = new TodoList(this);
     protected Storage store = new Storage("testdata.txt", todoList);
-    private Ui ui = new Ui();
+    private final Ui ui = new Ui();
 
-    private final int undoLimit = 1;
-    private final int numSavedStates = undoLimit + 1;
+    private final int numSavedStates = 2;
     protected ArrayDeque<Runnable> previousActions = new ArrayDeque<Runnable>(numSavedStates);
 
     /**
@@ -35,7 +34,7 @@ public class Echo {
         UNDO("undo"),
         INVALID("invalid");
 
-        public String cmd;
+        private final String cmd;
 
         CommandWord(String cmd) {
             this.cmd = cmd;
@@ -73,10 +72,8 @@ public class Echo {
         int todoListSize = todoList.getSize();
 
         if (previousActions.size() > numSavedStates) {
-            previousActions.pop();
+            previousActions.removeLast();
         }
-
-        System.out.println(previousActions);
 
         try {
             CommandWord cmdword = CommandWord.fromString(command);
@@ -100,7 +97,8 @@ public class Echo {
                     return ui.getMarkString(todoList.getTask(taskNum - 1), false);
                 }
                 case TODO -> {
-                    String desc = Parser.getTaskArgs(input, command)[0];
+                    String[] taskArgs = Parser.getTaskArgs(input, command);
+                    String desc = String.join("/ ", taskArgs);
                     Todo newTask = new Todo(desc);
                     this.todoList.addToList(newTask);
                     this.store.writeData(this.todoList.getList());
@@ -108,16 +106,16 @@ public class Echo {
                 }
                 case DEADLINE -> {
                     String[] taskArgs = Parser.getTaskArgs(input, command);
-                    assert taskArgs.length > 1;
                     Deadline newTask = new Deadline(taskArgs);
+                    assert taskArgs.length > 1;
                     this.todoList.addToList(newTask);
                     this.store.writeData(this.todoList.getList());
                     return ui.getAddedTaskString(newTask, cmdword.toString());
                 }
                 case EVENT -> {
                     String[] taskArgs = Parser.getTaskArgs(input, command);
-                    assert taskArgs.length > 1;
                     Task newTask = new Event(taskArgs);
+                    assert taskArgs.length > 1;
                     this.todoList.addToList(newTask);
                     this.store.writeData(this.todoList.getList());
                     return ui.getAddedTaskString(newTask, cmdword.toString());
@@ -137,15 +135,18 @@ public class Echo {
                     return ui.getSearchListString(searchList);
                 }
                 case UNDO -> {
+                    if (previousActions.isEmpty()) {
+                        throw new InvalidCommandException();
+                    }
                     previousActions.pop().run();
-                    return "undid the previous command.";
+                    return "Undid the previous action performed.";
                 }
                 default -> {
                     throw new InvalidCommandException();
                 }
             }
         } catch (InvalidCommandException e) {
-            return ui.getInvalidCommandMessage(command);
+            return InvalidCommandException.getInvalidCommandMessage(command);
         }
     }
 }
@@ -177,7 +178,7 @@ class Parser {
     public static int getTaskNum(int todoListSize, String[] commandArgs) throws InvalidCommandException {
         try {
             int taskNum = Integer.parseInt(commandArgs[1]);
-            if (taskNum > todoListSize) {
+            if (taskNum < 1 || taskNum > todoListSize) {
                 throw new InvalidCommandException();
             }
             return taskNum;
@@ -249,5 +250,41 @@ class Parser {
 }
 
 class InvalidCommandException extends IllegalArgumentException {
+    /**
+     * Retrieves the invalid input message specific to each type of command
+     *
+     * @param command the command that was incorrectly used
+     */
+    public static String getInvalidCommandMessage(String command) {
+        switch (Echo.CommandWord.fromString(command)) {
+            case MARK -> {
+                return "Invalid input for mark. Example usage: mark 2";
+            }
+            case UNMARK -> {
+                return "Invalid input for unmark. Example usage: unmark 2";
+            }
+            case TODO -> {
+                return "Invalid input for todo. Example usage: todo Example";
+            }
+            case DEADLINE -> {
+                return "Invalid input for deadline. Example usage: deadline Example /2023-12-13";
+            }
+            case EVENT -> {
+                return "Invalid input for event. Example usage: event Example /2023-12-13 /2023-12-14";
+            }
+            case DELETE -> {
+                return "Invalid input for delete. Example usage: delete 2";
+            }
+            case FIND -> {
+                return "Invalid input for find. Example usage: find book";
+            }
+            case UNDO -> {
+                return "There are no actions to be undone.";
+            }
+            default -> {
+                return "I don't know what that means.";
+            }
+        }
+    }
 }
 

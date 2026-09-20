@@ -26,22 +26,8 @@ public class Ui {
      * Returns Echo's welcome message.
      */
     public static String getWelcome() {
-        String banner =   " _____     _           \n"
-                        + "| ____|___| |__   ___  \n"
-                        + "|  _| / __| '_ \\ / _ \\ \n"
-                        + "| |__| (__| | | | (_) |\n"
-                        + "|_____\\__|_| |_|\\___/ \n";
-        String welcomeMessage = LINE + banner + LINE + String.format("Hi, I'm %s.\nWhat can I do for you?\n",
+        return LINE + String.format("Hi, I'm %s.\nWhat can I do for you?\n",
                 NAME) + ENDLINE;
-        return welcomeMessage;
-    }
-
-    /**
-     * Displays Echo's farewell message.
-     */
-    public static void printFarewell() {
-        String farewellMessage = "Goodbye" + LINE;
-        System.out.println(farewellMessage);
     }
 
     /**
@@ -103,39 +89,5 @@ public class Ui {
      */
     public String getSearchListString(TodoList list) {
         return "\nHere are the matching tasks:" + "\n" + list.toString();
-    }
-
-    /**
-     * Retrieves the invalid input message specific to each type of command
-     *
-     * @param command the command that was incorrectly used
-     */
-    public String getInvalidCommandMessage(String command) {
-        switch (command) {
-            case "mark" -> {
-                return "Invalid input for mark. Example usage: mark 2";
-            }
-            case "unmark" -> {
-                return "Invalid input for unmark. Example usage: unmark 2";
-            }
-            case "todo" -> {
-                return "Invalid input for todo. Example usage: todo Example";
-            }
-            case "deadline" -> {
-                return "Invalid input for deadline. Example usage: deadline Example /2023-12-13";
-            }
-            case "event" -> {
-                return "Invalid input for event. Example usage: event Example /2023-12-13 /2023-12-14";
-            }
-            case "delete" -> {
-                return "Invalid input for delete. Example usage: delete 2";
-            }
-            case "find" -> {
-                return "Invalid input for find. Example usage: find book";
-            }
-            default -> {
-                return "I don't know what that means.";
-            }
-        }
     }
 }

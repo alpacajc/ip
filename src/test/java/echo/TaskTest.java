@@ -1,7 +1,5 @@
 package echo;
 
-import java.time.format.DateTimeParseException;
-
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,16 +20,21 @@ public class TaskTest {
 
     @Test
     public void deadlineTestInvalidInput1() {
-        assertThrows(DateTimeParseException.class, () -> new Deadline("do work", "203-1-23"));
+        assertThrows(InvalidCommandException.class, () -> new Deadline("do work", "203-1-23"));
     }
 
     @Test
     public void deadlineTestInvalidInput2() {
-        assertThrows(DateTimeParseException.class, () -> new Deadline("do work", ""));
+        assertThrows(InvalidCommandException.class, () -> new Deadline("do work", ""));
     }
 
     @Test
     public void deadlineTestInvalidInput3() {
-        assertThrows(DateTimeParseException.class, () -> new Deadline("do work", ""));
+        assertThrows(InvalidCommandException.class, () -> new Deadline("do work", ""));
+    }
+
+    @Test
+    public void deadlineTestInvalidInput4() {
+        assertThrows(InvalidCommandException.class, () -> new Deadline("do work", "2021-12-23", "99"));
     }
 }
