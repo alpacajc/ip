@@ -13,7 +13,7 @@ import java.util.ArrayDeque;
 public class Echo {
     private final TodoList todoList = new TodoList(this);
     protected Storage store = new Storage("testdata.txt", todoList);
-    private final Ui ui = new Ui();
+    protected final Ui ui = new Ui();
 
     private final int numSavedStates = 2;
     protected ArrayDeque<Runnable> previousActions = new ArrayDeque<Runnable>(numSavedStates);
@@ -139,7 +139,7 @@ public class Echo {
                         throw new InvalidCommandException();
                     }
                     previousActions.pop().run();
-                    return "Undid the previous action performed.";
+                    return "THE PREVIOUS ACTION PERFORMED HAS BEEN REVERSED.";
                 }
                 default -> {
                     throw new InvalidCommandException();
@@ -258,31 +258,31 @@ class InvalidCommandException extends IllegalArgumentException {
     public static String getInvalidCommandMessage(String command) {
         switch (Echo.CommandWord.fromString(command)) {
             case MARK -> {
-                return "Invalid input for mark. Example usage: mark 2";
+                return "ERROR: INVALID INPUT FOR mark. EXAMPLE USAGE: mark 2";
             }
             case UNMARK -> {
-                return "Invalid input for unmark. Example usage: unmark 2";
+                return "ERROR: INVALID INPUT FOR unmark. EXAMPLE USAGE: unmark 2";
             }
             case TODO -> {
-                return "Invalid input for todo. Example usage: todo Example";
+                return "ERROR: INVALID INPUT FOR todo. EXAMPLE USAGE: todo Example";
             }
             case DEADLINE -> {
-                return "Invalid input for deadline. Example usage: deadline Example /2023-12-13";
+                return "ERROR: INVALID INPUT FOR deadline. EXAMPLE USAGE: deadline Example /2023-12-13";
             }
             case EVENT -> {
-                return "Invalid input for event. Example usage: event Example /2023-12-13 /2023-12-14";
+                return "ERROR: INVALID INPUT FOR event. EXAMPLE USAGE: event Example /2023-12-13 /2023-12-14";
             }
             case DELETE -> {
-                return "Invalid input for delete. Example usage: delete 2";
+                return "ERROR: INVALID INPUT FOR delete. EXAMPLE USAGE: delete 2";
             }
             case FIND -> {
-                return "Invalid input for find. Example usage: find book";
+                return "ERROR: INVALID INPUT FOR find. EXAMPLE USAGE: find book";
             }
             case UNDO -> {
-                return "There are no actions to be undone.";
+                return "ERROR: NO ACTIONS CAN BE UNDONE AT THIS POINT.";
             }
             default -> {
-                return "I don't know what that means.";
+                return "ERROR: COMMAND NOT FOUND IN DATABASE.";
             }
         }
     }
