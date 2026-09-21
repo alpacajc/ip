@@ -1,6 +1,6 @@
 package echo;
 
-class InvalidCommandException extends IllegalArgumentException {
+public class InvalidCommandException extends IllegalArgumentException {
     /**
      * Retrieves the invalid input message specific to each type of command
      *

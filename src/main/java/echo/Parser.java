@@ -39,7 +39,7 @@ public class Parser {
     }
 
     public static String getKeyword(String input, String command) throws InvalidCommandException {
-        if (input.equals(command)) {
+        if (input.trim().equals(command)) {
             throw new InvalidCommandException();
         }
         String[] commandArgs = input.trim()
