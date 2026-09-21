@@ -4,7 +4,7 @@ package echo;
  * Handles command-line input and output for Echo.
  */
 public class Ui {
-    private static final String NAME = "Echo";
+    private static final String NAME = "ECHO";
     private static final String LINE = "\n" + "-".repeat(30) + "\n";
     private static final String ENDLINE = "\n" + "-".repeat(30);
 
@@ -26,15 +26,17 @@ public class Ui {
      * Returns Echo's welcome message.
      */
     public static String getWelcome() {
-        return LINE + String.format("Hi, I'm %s.\nWhat can I do for you?\n",
-                NAME) + ENDLINE;
+        String banner = String.format(LINE + "%s TASK MANAGEMENT SYSTEM" + ENDLINE,
+                NAME);
+        return String.format("%s\n\nSYSTEM ONLINE.\n\nWELCOME, USER.\nAWAITING INPUT.",
+                banner);
     }
 
     /**
      * @return Echo's farewell message
      */
     public static String getFarewell() {
-        return "Goodbye" + LINE;
+        return "SESSION TERMINATED. GOODBYE." + LINE;
     }
 
     /**
@@ -44,7 +46,7 @@ public class Ui {
      * @param type the type of task that was added
      */
     public String getAddedTaskString(Task task, String type) {
-        return String.format("Added this %s task:\n  %s",
+        return String.format("%s TASK ADDED:\n  %s",
                 type, task);
     }
 
@@ -55,7 +57,7 @@ public class Ui {
      * @param size the number of tasks remaining
      */
     public String getDeleteTask(Task deletedTask, int size) {
-        return String.format("Deleted this task\n  %s\nNow you have %d tasks left",
+        return String.format("TASK TERMINATED:\n  %s\n%d TASKS REMAIN.",
                 deletedTask, size);
     }
 
@@ -67,9 +69,9 @@ public class Ui {
      */
     public String getMarkString(Task task, boolean isMarked) {
         if (isMarked) {
-            return String.format("Marked this task as done:\n  %s", task);
+            return String.format("TASK STATUS:\n  %s - COMPLETED", task);
         } else {
-            return String.format("Marked this task as not done:\n  %s", task);
+            return String.format("TASK STATUS:\n  %s - PENDING", task);
         }
     }
 
@@ -88,6 +90,6 @@ public class Ui {
      * @param list the task list to return as string
      */
     public String getSearchListString(TodoList list) {
-        return "\nHere are the matching tasks:" + "\n" + list.toString();
+        return "\nPROCESSING:" + "\n" + "MATCHING TASKS FOUND:\n" + list.toString();
     }
 }
