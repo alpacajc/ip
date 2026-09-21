@@ -6,17 +6,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class EchoTest {
+public class ParserTest {
     @Test
     public void commandWordTest1() {
         assertEquals("BYE",
-                Echo.CommandWord.fromString("bye").toString());
+                CommandWord.fromString("bye").toString());
     }
 
     @Test
     public void commandWordTest2() {
         assertEquals("INVALID",
-                Echo.CommandWord.fromString("").toString());
+                CommandWord.fromString("").toString());
     }
 
     @Test

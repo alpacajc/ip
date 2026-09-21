@@ -9,6 +9,9 @@ import java.util.ArrayList;
 
 import java.util.Scanner;
 
+/**
+ * Handles the reading and writing of data to and from storage, so tasks are saved between sessions.
+ */
 public class Storage {
     private File listFile;
     private TodoList todoList;

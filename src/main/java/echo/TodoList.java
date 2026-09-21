@@ -15,6 +15,7 @@ public class TodoList {
 
     public TodoList() {
     }
+
     /**
      * Creates a TodoList storing a reference to an Echo object
      *
@@ -23,6 +24,7 @@ public class TodoList {
     public TodoList(Echo echo) {
         this.echo = echo;
     }
+
     /**
      * Adds a task to the end of this list.
      *
@@ -39,6 +41,7 @@ public class TodoList {
         System.out.println(String.format("\nThere are now %d items in the list",
                 listOfTasks.size()));
     }
+
     /**
      * Adds a task to the end of this list. Used when reading data from storage.
      *
@@ -49,6 +52,7 @@ public class TodoList {
 
         listOfTasks.add(item);
     }
+
     /**
      * Marks the specified one-based task number as complete.
      *
@@ -66,6 +70,7 @@ public class TodoList {
         targetTask.mark();
         this.echo.previousActions.push(() -> targetTask.unmark());
     }
+
     /**
      * Marks the specified one-based task number as incomplete.
      *
@@ -83,6 +88,7 @@ public class TodoList {
         targetTask.unmark();
         this.echo.previousActions.push(() -> targetTask.mark());
     }
+
     /**
      * Removes and returns the task at the specified one-based task number.
      *
@@ -115,11 +121,13 @@ public class TodoList {
         TodoList searchList = new TodoList();
         for (Task currentTask : this.listOfTasks) {
             if (currentTask.getDesc().contains(keyword)) {
-                searchList.addToList(currentTask);
+                // addToListFromStorage is used here because there is no need to store runnables.
+                searchList.addToListFromStorage(currentTask);
             }
         }
         return searchList;
     }
+
     /**
      * Returns the tasks in this list.
      *
@@ -128,6 +136,7 @@ public class TodoList {
     public ArrayList<Task> getList() {
         return this.listOfTasks;
     }
+
     /**
      * Returns the task at the specified zero-based index.
      *
@@ -137,6 +146,7 @@ public class TodoList {
     public Task getTask(int index){
         return this.listOfTasks.get(index);
     }
+
     /**
      * Returns a numbered, formatted representation of this task list.
      *
@@ -156,6 +166,7 @@ public class TodoList {
         }
         return LINE + output + ENDLINE;
     }
+
     /**
      * Returns the number of tasks in this list.
      *

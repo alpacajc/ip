@@ -1,26 +1,12 @@
 package echo;
 
 /**
- * Handles command-line input and output for Echo.
+ * Handles command-line output messages for Echo.
  */
 public class Ui {
     private static final String NAME = "ECHO";
     private static final String LINE = "\n" + "-".repeat(30) + "\n";
     private static final String ENDLINE = "\n" + "-".repeat(30);
-
-    /**
-     * Displays Echo's welcome message.
-     */
-    public static void printWelcome() {
-        String banner = " _____     _           \n"
-                + "| ____|___| |__   ___  \n"
-                + "|  _| / __| '_ \\ / _ \\ \n"
-                + "| |__| (__| | | | (_) |\n"
-                + "|_____\\___|_| |_|\\___/ \n";
-        String welcomeMessage = LINE + banner + LINE + String.format("Hi, I'm %s.\nWhat can I do for you?\n",
-                NAME) + ENDLINE;
-        System.out.println(welcomeMessage);
-    }
 
     /**
      * Returns Echo's welcome message.
