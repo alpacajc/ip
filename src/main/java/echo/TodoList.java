@@ -115,7 +115,8 @@ public class TodoList {
         TodoList searchList = new TodoList();
         for (Task currentTask : this.listOfTasks) {
             if (currentTask.getDesc().contains(keyword)) {
-                searchList.addToList(currentTask);
+                // addToListFromStorage is used here because there is no need to store runnables.
+                searchList.addToListFromStorage(currentTask);
             }
         }
         return searchList;
