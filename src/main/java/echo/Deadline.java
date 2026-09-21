@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 /**
- * Creates a deadline task with a description and due date.
+ * Deadline task which has a description and a deadline, which includes a date and optionally a time.
  */
 public class Deadline extends Task {
     private final String taskMarker = "[D]";
@@ -18,6 +18,11 @@ public class Deadline extends Task {
 
     private String formattedDate;
 
+    /**
+     * Creates a deadline task with a description and due date.
+     *
+     * @param taskArgs arguments used to create the deadline task
+     */
     public Deadline(String... taskArgs) throws InvalidCommandException {
         super(taskArgs[0]);
         if (taskArgs.length < 2) {

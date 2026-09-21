@@ -1,7 +1,7 @@
 package echo;
 
 /**
- * Handles command-line input and output for Echo.
+ * Handles command-line output messages for Echo.
  */
 public class Ui {
     private static final String NAME = "ECHO";

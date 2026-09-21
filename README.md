@@ -59,12 +59,15 @@ To help avoid any issues use Java 25.
 5. ```delete```
    - Deletes a task stored by the todo list, at the position specified by the integer argument provided.
    - Example usage: ```delete 2``` - deletes the task at position 2 of the list.
+   - Position provided must be a positive integer.
 6. ```mark``` and ```unmark```
    - Marks/unmarks a task stored by the todo list, at the position specified by the integer argument provided.
    - Example usage: ```mark 2``` - marks the task at position 2 of the list.
+   - Position provided must be a positive integer.
 7. ```find```
    - Finds the tasks stored by the todo list containing the word/string specified by the argument provided.
-   - Example usage: ```find work``` - finds all the tasks in the list that contain 'work', such as 'Do work', 'Work on project' etc.
+   - Example usage: ```find work``` - finds all the tasks in the list that contain 'work', such as 'Do work',
+   'Work on project' etc.
 8. ```undo```
    - Reverses the previous command that made a change to the list. So ```todo Work``` would be undone but not
    ```mark 2``` if the task at position 2 of the list was already marked.

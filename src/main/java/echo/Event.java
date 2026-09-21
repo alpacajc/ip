@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 /**
- * Creates an event item with a from time and to time.
+ * Event task that has start and end dates, and optionally start and end times.
  */
 public class Event extends Task {
     String taskMarker = "[E]";
@@ -22,6 +22,11 @@ public class Event extends Task {
     String formattedFromDate;
     String formattedToDate;
 
+    /**
+     * Creates an event item with a from date and to date, and optionally a from time and to time.
+     *
+     * @param taskArgs arguments used to create the event task
+     */
     public Event(String... taskArgs) throws InvalidCommandException {
         super(taskArgs[0]);
         if (taskArgs.length < 3) {

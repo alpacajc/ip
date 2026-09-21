@@ -1,11 +1,16 @@
 package echo;
 
 /**
- * Creates a task item with no time or date associated with it.
+ * Simple task object that only has a description.
  */
 public class Todo extends Task {
     private final String taskMarker = "[T]";
 
+    /**
+     * Creates a task item with no time or date associated with it.
+     *
+     * @param desc the description associated with the task
+     */
     public Todo(String desc) {
         super(desc);
     }

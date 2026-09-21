@@ -1,5 +1,8 @@
 package echo;
 
+/**
+ * Custom exception meant to be thrown when the user inputs an invalid command.
+ */
 public class InvalidCommandException extends IllegalArgumentException {
     /**
      * Retrieves the invalid input message specific to each type of command

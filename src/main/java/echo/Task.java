@@ -16,6 +16,7 @@ public class Task {
         this.description = description;
         this.isDone = false;
     }
+
     /**
      * Returns this task's description.
      *
@@ -24,6 +25,7 @@ public class Task {
     public String getDesc() {
         return description;
     }
+
     /**
      * Returns whether this task is complete in storage-friendly form.
      *
@@ -32,6 +34,7 @@ public class Task {
     public String getStatus() {
         return String.valueOf(isDone);
     }
+
     /**
      * Returns the visual marker for this task's completion status.
      *
@@ -40,18 +43,21 @@ public class Task {
     public String getStatusMarker() {
         return this.isDone ? "[X]" : "[ ]";
     }
+
     /**
      * Marks this task as complete.
      */
     public void mark() {
         this.isDone = true;
     }
+
     /**
      * Marks this task as incomplete.
      */
     public void unmark() {
         this.isDone = false;
     }
+
     /**
      * Converts this task to the format used when saving it to storage.
      *
@@ -65,6 +71,7 @@ public class Task {
                         description
                 });
     }
+
     /**
      * Returns the formatted representation shown to the user.
      *
