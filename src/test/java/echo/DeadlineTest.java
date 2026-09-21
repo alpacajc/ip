@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class TaskTest {
+public class DeadlineTest {
     @Test
     public void deadlineTestDate() {
         Deadline deadline = new Deadline("do work", "2023-12-23");

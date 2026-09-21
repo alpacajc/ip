@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class EchoTest {
+public class ParserTest {
     @Test
     public void commandWordTest1() {
         assertEquals("BYE",
